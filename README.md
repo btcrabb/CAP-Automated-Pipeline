@@ -13,9 +13,13 @@ Project Organization
 
     ├── data
     │   ├── processed      <- Data sorted according to MRI view.
-    │   ├── raw            <- The original, immutable data (dicom files).
+    │   └── raw            <- The original, immutable data (dicom files).
     |
-    ├── models             <- Trained and serialized models (VGG-19, ResNet50, and Xception)
+    ├── models             <- Trained and serialized models, organized by task
+    │   ├──  Landmarks 
+    │   ├──  ViewSelection 
+    │   ├──  PhaseSelection 
+    │   └── SliceSelection 
     │
     ├── notebooks          <- Jupyter notebooks for
     │
