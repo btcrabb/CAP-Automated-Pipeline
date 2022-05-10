@@ -34,15 +34,15 @@ Project Organization
 
 To ensure a working python environment, it is recommended to create a new conda environment from the provided requirements.txt file. To do so, enter the following commands into the terminal: 
 
-'''
+```
 conda create --name CAP --file requirements.txt
-'''
+```
     
 Followed by:
 
-'''
+```
 conda activate CAP
-'''
+```
 
 ### 2.0 Download Trained Models
 
@@ -51,3 +51,7 @@ Download the trained models for each step from the following linK:
 https://uofu.box.com/s/wlhvxcyx09wliz9oadpt763ggq9h0rua
 
 In the models folder, each step in the end-to=end pipeline has its own subfolder with the trained model. New models can be added to these folders and called from the corresponding Jupyter notebook if desired. 
+
+### 3.0 End-to-end Pipeline
+
+Once you have a working python environment, and the trained models have been downloaded, you can run the end-to-end pipeline using the provided jupyter notebook, 1.1-BTC-FullAutoCAP.ipynb.
