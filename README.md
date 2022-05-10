@@ -28,7 +28,9 @@ Project Organization
     └── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
                               generated with `pip freeze > requirements.txt`
 
-**Getting Started**
+## Getting Started
+
+#### Download Trained Models
 
 Download the trained models for each step from the following linK:
 
