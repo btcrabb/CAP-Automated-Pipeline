@@ -1,9 +1,12 @@
 Towards fully automated cardiac statistical modeling
 ==============================
-Author: Brendan Crabb
-Email: brendan.crabb@hsc.utah.edu
 
 Fully-automated, deep-learning based pipeline to generate biventricular cardiac models from raw cine SSFP MRI images.
+
+Author: Brendan Crabb
+
+Email: brendan.crabb@hsc.utah.edu
+
 
 Project Organization
 ------------
