@@ -30,7 +30,21 @@ Project Organization
 
 ## Getting Started
 
-#### Download Trained Models
+### 1.0 Conda Environment
+
+To ensure a working python environment, it is recommended to create a new conda environment from the provided requirements.txt file. To do so, enter the following commands into the terminal: 
+
+'''
+conda create --name CAP --file requirements.txt
+'''
+    
+Followed by:
+
+'''
+conda activate CAP
+'''
+
+### 2.0 Download Trained Models
 
 Download the trained models for each step from the following linK:
 
