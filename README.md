@@ -12,27 +12,30 @@ Project Organization
 ------------
 
     ├── data
-    │   ├── processed      <- Data sorted according to MRI view.
-    │   └── raw            <- The original, immutable data (dicom files).
+    │   ├── processed            <- Data sorted according to MRI view.
+    │   └── raw                  <- The original, immutable data (dicom files).
     |
-    ├── models             <- Trained and serialized models, organized by task
+    ├── models                   <- Trained and serialized models, organized by task
     │   ├──  Landmarks 
     │   ├──  ViewSelection 
     │   ├──  PhaseSelection 
     │   └── SliceSelection 
     │
-    ├── notebooks          <- Jupyter notebooks for
+    ├── notebooks                 <- Jupyter notebooks for running end-to-end pipeline
     │
-    ├── reports            <- Generated analysis, saved .csv with view predictions for each series
+    ├── src                       <- Source code for each step / module
+    │   ├── viewselection.py      <- View Selection Module.
+    │   └── phaseselection.py     <- Phase Selection Module.
     │
-    └── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-                              generated with `pip freeze > requirements.txt`
+    ├── reports                   <- Generated analysis, saved .csv with view predictions for each series
+    │
+    └── environment.yml           <- The conda requirements file for reproducing the analysis environment
 
 ## Getting Started
 
 ### 1.0 Conda Environment
 
-To ensure a working python environment, it is recommended to create a new conda environment from the provided environment.yml file. To do so, enter the following commands into the terminal: 
+To ensure a working python environment, I recommend creating a new conda environment from the provided environment.yml file. To do so, enter the following commands into the terminal: 
 
 ```
 conda env create -f environment.yml
