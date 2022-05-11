@@ -32,7 +32,7 @@ Project Organization
 
 ### 1.0 Conda Environment
 
-To ensure a working python environment, it is recommended to create a new conda environment from the provided requirements.txt file. To do so, enter the following commands into the terminal: 
+To ensure a working python environment, it is recommended to create a new conda environment from the provided environment.yml file. To do so, enter the following commands into the terminal: 
 
 ```
 conda env create -f environment.yml
