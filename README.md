@@ -35,10 +35,10 @@ Project Organization
 To ensure a working python environment, it is recommended to create a new conda environment from the provided requirements.txt file. To do so, enter the following commands into the terminal: 
 
 ```
-conda create --name CAP --file requirements.txt
+conda env create -f environment.yml
 ```
     
-Followed by:
+The conda environment will be named "CAP". Activate it by running:
 
 ```
 conda activate CAP
