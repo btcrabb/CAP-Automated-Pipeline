@@ -1,0 +1,17 @@
+,Slice ID,View,Time Frame,RV1,RV2,MV1,MV2,TV1,TV2,LVA,AV1,AV2,PV1,PV2
+3,13,SA,0,"(array([105], dtype=int64), array([103], dtype=int64))","(array([134], dtype=int64), array([117], dtype=int64))",,,,,,,,,
+4,14,SA,0,"(array([104], dtype=int64), array([105], dtype=int64))","(array([134], dtype=int64), array([116], dtype=int64))",,,,,,,,,
+5,15,SA,0,"(array([107], dtype=int64), array([107], dtype=int64))","(array([141], dtype=int64), array([115], dtype=int64))",,,,,,,,,
+6,16,SA,0,"(array([107], dtype=int64), array([108], dtype=int64))","(array([141], dtype=int64), array([115], dtype=int64))",,,,,,,,,
+7,17,SA,0,"(array([105], dtype=int64), array([107], dtype=int64))","(array([144], dtype=int64), array([117], dtype=int64))",,,,,,,,,
+3,13,SA,13,"(array([107], dtype=int64), array([103], dtype=int64))","(array([125], dtype=int64), array([112], dtype=int64))",,,,,,,,,
+4,14,SA,13,"(array([111], dtype=int64), array([107], dtype=int64))","(array([128], dtype=int64), array([110], dtype=int64))",,,,,,,,,
+5,15,SA,13,"(array([111], dtype=int64), array([107], dtype=int64))","(array([135], dtype=int64), array([110], dtype=int64))",,,,,,,,,
+6,16,SA,13,"(array([108], dtype=int64), array([105], dtype=int64))","(array([134], dtype=int64), array([110], dtype=int64))",,,,,,,,,
+7,17,SA,13,"(array([110], dtype=int64), array([104], dtype=int64))","(array([134], dtype=int64), array([111], dtype=int64))",,,,,,,,,
+1,3,4CH,0,,,"(array([135], dtype=int64), array([128], dtype=int64))","(array([155], dtype=int64), array([136], dtype=int64))","(array([132], dtype=int64), array([130], dtype=int64))","(array([117], dtype=int64), array([117], dtype=int64))","(array([121], dtype=int64), array([175], dtype=int64))",,,,
+1,3,4CH,13,,,"(array([137], dtype=int64), array([129], dtype=int64))","(array([150], dtype=int64), array([142], dtype=int64))","(array([130], dtype=int64), array([134], dtype=int64))","(array([116], dtype=int64), array([122], dtype=int64))","(array([116], dtype=int64), array([170], dtype=int64))",,,,
+0,0,3CH,0,,,"(array([134], dtype=int64), array([130], dtype=int64))","(array([142], dtype=int64), array([135], dtype=int64))",,,,"(array([128], dtype=int64), array([124], dtype=int64))","(array([109], dtype=int64), array([125], dtype=int64))",,
+0,0,3CH,13,,,"(array([128], dtype=int64), array([142], dtype=int64))","(array([139], dtype=int64), array([141], dtype=int64))",,,,"(array([120], dtype=int64), array([130], dtype=int64))","(array([109], dtype=int64), array([131], dtype=int64))",,
+0,6,RVOT,0,,,,,,,,,,"(array([111], dtype=int64), array([92], dtype=int64))","(array([122], dtype=int64), array([100], dtype=int64))"
+0,6,RVOT,13,,,,,,,,,,"(array([111], dtype=int64), array([95], dtype=int64))","(array([125], dtype=int64), array([99], dtype=int64))"

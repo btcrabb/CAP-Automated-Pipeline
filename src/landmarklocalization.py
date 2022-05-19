@@ -7,6 +7,7 @@ import pydicom
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import cv2
 import tensorflow as tf
 
 
@@ -77,6 +78,49 @@ class LandmarkLocalization:
             location = row['ImagePositionPatient']
             self.mapping_dict[str(location)] = slice_id
 
+    def ensure_size(self, img, size, padColor=0):
+
+        # pads and image to square and resizes
+
+        h, w = img.shape[:2]
+        sh, sw = size
+
+        # interpolation method
+        if h > sh or w > sw: # shrinking image
+            interp = cv2.INTER_AREA
+        else: # stretching image
+            interp = cv2.INTER_CUBIC
+
+        # aspect ratio of image
+        aspect = w/h 
+
+        # compute scaling and pad sizing
+        if aspect > 1: # horizontal image
+            new_w = sw
+            new_h = np.round(new_w/aspect).astype(int)
+            pad_vert = (sh-new_h)/2
+            pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
+            pad_left, pad_right = 0, 0
+        elif aspect < 1: # vertical image
+            new_h = sh
+            new_w = np.round(new_h*aspect).astype(int)
+            pad_horz = (sw-new_w)/2
+            pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
+            pad_top, pad_bot = 0, 0
+        else: # square image
+            new_h, new_w = sh, sw
+            pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
+
+        # set pad color
+        if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
+            padColor = [padColor]*3
+
+        # scale and pad
+        scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
+        scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
+
+        return scaled_img
+
     def generate_complete_volume(self):
 
         # Generates a volume to store 3D + time data for each cardiac view (4CH, 3CH, RVOT, SA)
@@ -102,15 +146,20 @@ class LandmarkLocalization:
         # iterate through each slice location, ordering images and adding to volume
         for key in loaded_dcm_dict.keys():
             slice_id = int(self.mapping_dict[key])
-            instances = [dcm.InstanceNumber for dcm in loaded_dcm_dict[key]]
+            instances = [int(dcm.InstanceNumber) for dcm in loaded_dcm_dict[key]]
             min_instance = np.min(instances)
 
-            for dcm in loaded_dcm_dict[key]:
-                instance_number = int(dcm.InstanceNumber)
-                phase_number = instance_number - min_instance
+            try:
+                for dcm in loaded_dcm_dict[key]:
+                    instance_number = int(dcm.InstanceNumber)
+                    phase_number = instance_number - min_instance
 
-                # add to volume
-                self.volume[slice_id, phase_number, :, :, 0] = dcm.pixel_array
+                    # add to volume
+                    self.volume[slice_id, phase_number, :, :, 0] = self.ensure_size(dcm.pixel_array, (256, 256))
+            except:
+                print('Unable to copy pixel array to volume. Likely caused by an incorrect phase number, check that your list of dicoms is correct')
+                print('Phase: ', phase_number)
+                print('Slice number: ', slice_id)
 
     def predict_landmarks(self, phase=0):
 
