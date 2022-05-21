@@ -38,13 +38,21 @@ Project Organization
 To ensure a working python environment, I recommend creating a new conda environment from the provided environment.yml file. To do so, enter the following commands into the terminal: 
 
 ```
-conda env create -f environment.yml
+> conda env create -f environment.yml
 ```
     
 The conda environment will be named "CAP". Activate it by running:
 
 ```
-conda activate CAP
+> conda activate CAP
+```
+
+Next, it is necessary to install the local version of nnUNet. To do so, enter I suggest using pip and the provided setup.py files by entering the code below:
+
+```
+> cd nnunet
+> pip install -e .
+> cd ..
 ```
 
 ### 2.0 Download Trained Models
