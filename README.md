@@ -12,20 +12,27 @@ Project Organization
 ------------
 
     ├── data
-    │   ├── processed            <- Data sorted according to MRI view.
+    │   ├── final                <- NIFTI images for use with nnUNet
+    │   ├── segmentations        <- nnUNet segmentations for each patient
+    │   ├── processed            <- Sorted DICOMS and output files for each patient.
     │   └── raw                  <- The original, immutable data (dicom files).
     |
     ├── models                   <- Trained and serialized models, organized by task
     │   ├──  Landmarks 
     │   ├──  ViewSelection 
     │   ├──  PhaseSelection 
-    │   └── SliceSelection 
+    │   ├──  SliceSelection 
+    │   └──  Segmentation
     │
     ├── notebooks                 <- Jupyter notebooks for running end-to-end pipeline
     │
+    ├── nnUNet                    <- Local installation of nnUNet (altered to support windows)
+    │
     ├── src                       <- Source code for each step / module
-    │   ├── viewselection.py      <- View Selection Module.
-    │   └── phaseselection.py     <- Phase Selection Module.
+    │   ├── viewselection.py
+    │   ├── phaseselection.py  
+    │   ├── landmarklocalization.py 
+    │   └── guidepointprocessing.py     
     │
     ├── reports                   <- Generated analysis, saved .csv with view predictions for each series
     │
