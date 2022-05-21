@@ -47,12 +47,11 @@ The conda environment will be named "CAP". Activate it by running:
 > conda activate CAP
 ```
 
-Next, it is necessary to install the local version of nnUNet. To do so, enter I suggest using pip and the provided setup.py files by entering the code below:
+Next, it is necessary to install the local version of nnUNet. To do so, I suggest using pip and the provided setup.py files by entering the code below:
 
 ```
 > cd nnunet
 > pip install -e .
-> cd ..
 ```
 
 ### 2.0 Download Trained Models
