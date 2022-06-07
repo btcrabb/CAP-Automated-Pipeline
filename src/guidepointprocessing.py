@@ -145,10 +145,10 @@ class GuidePointProcessing():
         for file in self.sa_seg_files:
 
             # change input name to include modality info (nnUnet formatting)
-            view, slice_id, time = file.split('\\')[-1].split('_')
+            view, slice_id, time = file.split('/')[-1].split('_')
             time = int(time.split('.')[0])
-            prefix = file.split('\\')[-1].split('.')
-            input_name = 'SA\\' + prefix[0]  + '_0000.' + prefix[1] + '.' + prefix[2]
+            prefix = file.split('/')[-1].split('.')
+            input_name = 'SA/' + prefix[0]  + '_0000.' + prefix[1] + '.' + prefix[2]
             
             segmentation = nib.load(file).get_fdata().T[0,:,:].T
             image = nib.load(os.path.join(self.image_folder, input_name)).get_fdata().T[0,:,:]
@@ -169,13 +169,25 @@ class GuidePointProcessing():
 
             # convert to contours
             contours, hierarchy = cv2.findContours(cv2.inRange(LV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            LV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)   
+            if len(contours) > 0:
+                LV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+            else:
+                LV_endo_pts = []
             contours, hierarchy = cv2.findContours(cv2.inRange(LV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            LV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+            if len(contours) > 0:
+                LV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+            else:
+                LV_epi_pts = []
             contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+            if len(contours) > 0:
+                RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)
+            else:
+                RV_endo_pts = []
             contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+            if len(contours) > 0:
+                RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)
+            else:
+                RV_epi_pts = []
 
             # Get intersection points between RV endo and LV epi
             if len(RV_endo_pts)>0 and len(LV_epi_pts)>0:
@@ -198,14 +210,20 @@ class GuidePointProcessing():
                                           dtype=np.int64)
 
             if display:
-                plt.figure(figsize=(12,12))
-                plt.imshow(image,cmap='gray')
-                plt.scatter(RV_endo_pts[:,1], RV_endo_pts[:,0], s=5, c='#F2CA19')
-                plt.scatter(RV_septal_pts[:,1], RV_septal_pts[:,0], s=5, c='#E11845')
-                plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
-                plt.scatter(LV_epi_pts[:,1], LV_epi_pts[:,0], s=5, c='#0057E9')
-                plt.scatter(LV_endo_pts[:,1], LV_endo_pts[:,0], s=5, c='#87E911')
-                plt.show()
+                    plt.figure(figsize=(12,12))
+                    plt.imshow(image,cmap='gray')
+                    try:
+                        plt.scatter(RV_endo_pts[:,1], RV_endo_pts[:,0], s=5, c='#F2CA19')
+                        plt.scatter(RV_septal_pts[:,1], RV_septal_pts[:,0], s=5, c='#E11845')
+                        plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
+                    except:
+                        pass
+                    try:
+                        plt.scatter(LV_epi_pts[:,1], LV_epi_pts[:,0], s=5, c='#0057E9')
+                        plt.scatter(LV_endo_pts[:,1], LV_endo_pts[:,0], s=5, c='#87E911')
+                    except:
+                        pass
+                    plt.show()
 
             # transform to patient coordinates and write to GP file
             point_lists = [RV_endo_pts,
@@ -226,9 +244,9 @@ class GuidePointProcessing():
 
                     if time > 1:
                         # write to file
-                        write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=float(time))
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
                     else:
-                        write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=float(time))
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
 
     def process_long_axis(self, display=False):
 
@@ -237,10 +255,10 @@ class GuidePointProcessing():
         for file in self.la_seg_files:
     
             # change input name to include modality info (nnUnet formatting)
-            view, slice_id, time = file.split('\\')[-1].split('_')
+            view, slice_id, time = file.split('/')[-1].split('_')
             time = int(time.split('.')[0])
-            prefix = file.split('\\')[-1].split('.')
-            input_name = '{}\\'.format(view) + prefix[0]  + '_0000.' + prefix[1] + '.' + prefix[2]
+            prefix = file.split('/')[-1].split('.')
+            input_name = '{}/'.format(view) + prefix[0]  + '_0000.' + prefix[1] + '.' + prefix[2]
             
             segmentation = nib.load(file).get_fdata().T[0,:,:].T
             image = nib.load(os.path.join(self.image_folder, input_name)).get_fdata().T[0,:,:]
@@ -285,6 +303,15 @@ class GuidePointProcessing():
                         RV_epi_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_epi_pts) if i in np.unique(pairs[:,0])], 
                                               dtype=np.int64)
                         
+                # Get intersection points between RV myo and RV endo
+                if len(RV_endo_pts)>0 and len(RV_myo_pts)>0:
+
+                    pairs = self.get_intersections(RV_endo_pts, RV_myo_pts, distance_cutoff = 10.0)
+
+                    if len(pairs) > 0:
+                        RV_endo_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_endo_pts) if i in np.unique(pairs[:,0])], 
+                                              dtype=np.int64)
+
                 # Remove points located in the valve planes
                 landmarks = self.landmarks_df[self.landmarks_df['Slice ID'] == int(slice_id)]
                 landmarks = landmarks[landmarks['Time Frame'] == time]
@@ -292,24 +319,32 @@ class GuidePointProcessing():
                 # pulmonary valve
                 pv1 = landmarks['PV1'].item()
                 pv2 = landmarks['PV2'].item()
-                RV_epi_pts = remove_valve_points(RV_epi_pts, [pv1, pv2])
+                
+                if np.isnan(pv1).any() or np.isnan(pv2).any():
+                    pass
+                else:
+                    RV_epi_pts = remove_valve_points(RV_epi_pts, [pv1, pv2])
+                    RV_endo_pts = remove_valve_points(RV_endo_pts, [pv1, pv2])
 
                 if display:
                     try:
                         plt.figure(figsize=(12,12))
                         plt.imshow(image,cmap='gray')
-                        plt.scatter(pv1[1], pv1[0])
-                        plt.scatter(pv2[1], pv2[0])
-                        plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
+                        try:
+                            plt.scatter(pv1[1], pv1[0])
+                            plt.scatter(pv2[1], pv2[0])
+                        except:
+                            pass
+                        #plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
+                        plt.scatter(RV_endo_pts[:,1], RV_endo_pts[:,0], s=5, c='#F2CA19')
                         plt.show()
                     except:
                         pass
 
                 # transform to patient coordinates and write to GP file
-                # only write the epi cardial points, as extracting the septum vs. freewall for the
-                # endocardium is unreliable in the RVOT view
-                point_lists = [RV_epi_pts] 
-                labels = ['LAX_RV_EPICARDIAL']
+                # only write the endo cardial points to be consistent with manual pipelien
+                point_lists = [RV_endo_pts] 
+                labels = ['LAX_RV_FREEWALL']
 
                 for i,points in enumerate(point_lists):
                     if len(points)>2:
@@ -318,9 +353,88 @@ class GuidePointProcessing():
 
                         if time > 1:
                             # write to file
-                            write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=float(time))
+                            write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
                         else:
-                            write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=float(time))
+                            write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
+
+            elif view == 'RVT' or view == '2CHLT':
+
+                # process 2CH RT views separately as the segmentation labels are different
+                # load necessary information for coordinate transformation
+                _slice_info = self.slice_info_df[self.slice_info_df['Slice ID'] == int(slice_id)]
+                S = _slice_info['ImagePositionPatient'].values[0]
+                imgOrient = _slice_info['ImageOrientationPatient'].values[0]
+                ps = _slice_info['Pixel Spacing'].values[0]
+
+                # extract points
+                RV_endo = (segmentation == 1).astype(np.uint8)
+                RV_myo = (segmentation == 2).astype(np.uint8)
+                RV_epi = (RV_endo | RV_myo).astype(np.uint8)
+
+                # convert to contours
+                contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                else:
+                    RV_endo_pts = []
+                contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                else:
+                    RV_epi_pts = []
+                contours, hierarchy = cv2.findContours(cv2.inRange(RV_myo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    RV_myo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                else:
+                    RV_myo_pts = []
+
+                # Get intersection points between RV epi and RV myo
+                if len(RV_epi_pts)>0 and len(RV_myo_pts)>0:
+
+                    pairs = self.get_intersections(RV_epi_pts, RV_myo_pts, distance_cutoff = 4.5)
+
+                    if len(pairs) > 0:
+                        RV_epi_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_epi_pts) if i in np.unique(pairs[:,0])], 
+                                              dtype=np.int64)
+
+                # Get intersection points between RV myo and RV endo
+                if len(RV_endo_pts)>0 and len(RV_myo_pts)>0:
+
+                    pairs = self.get_intersections(RV_endo_pts, RV_myo_pts, distance_cutoff = 4.5)
+
+                    if len(pairs) > 0:
+                        RV_endo_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_endo_pts) if i in np.unique(pairs[:,0])], 
+                                              dtype=np.int64)
+
+                if display:
+                    try:
+                        plt.figure(figsize=(12,12))
+                        plt.imshow(image,cmap='gray')
+                        plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
+                        plt.scatter(RV_endo_pts[:,1], RV_endo_pts[:,0], s=5, c='#F2CA19')
+                        plt.show()
+                    except:
+                        pass
+
+                # transform to patient coordinates and write to GP file
+                # only write the epi cardial points, as extracting the septum vs. freewall for the
+                # endocardium is unreliable in the RVOT view
+                point_lists = [RV_epi_pts, RV_endo_pts] 
+                if view == 'RVT':
+                    labels = ['LAX_RV_EPICARDIAL', 'LAX_RV_FREEWALL']
+                elif view == '2CHLT':         
+                    labels = ['LAX_LV_EPICARDIAL', 'LAX_LV_ENDOCARDIAL']
+
+                for i,points in enumerate(point_lists):
+                    if len(points)>2:
+                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps)
+                                   for point in points.tolist()]
+
+                        if time > 1:
+                            # write to file
+                            write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
+                        else:
+                            write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
             
             else:
                 # 4CH and 3CH views are processed similarly
@@ -383,28 +497,44 @@ class GuidePointProcessing():
                     # mitral valve
                     mv1 = landmarks['MV1'].item()
                     mv2 = landmarks['MV2'].item()
-                    LV_epi_pts = remove_valve_points(LV_epi_pts, [mv1, mv2])
-                    LV_endo_pts = remove_valve_points(LV_endo_pts, [mv1, mv2])
+                    
+                    if np.isnan(mv1).any() or np.isnan(mv2).any():
+                        pass
+                    else:
+                        LV_epi_pts = remove_valve_points(LV_epi_pts, [mv1, mv2])
+                        LV_endo_pts = remove_valve_points(LV_endo_pts, [mv1, mv2])
                     
                     # tricuspid valve
                     tv1 = landmarks['TV1'].item()
                     tv2 = landmarks['TV2'].item()
-                    RV_epi_pts = remove_valve_points(RV_epi_pts, [tv1, tv2])
-                    RV_endo_pts = remove_valve_points(RV_endo_pts, [tv1, tv2])
-                    RV_septal_pts = remove_valve_points(RV_septal_pts, [tv1, tv2])
+                    
+                    if np.isnan(tv1).any() or np.isnan(tv2).any():
+                        pass
+                    else:
+                        RV_epi_pts = remove_valve_points(RV_epi_pts, [tv1, tv2])
+                        RV_endo_pts = remove_valve_points(RV_endo_pts, [tv1, tv2])
+                        RV_septal_pts = remove_valve_points(RV_septal_pts, [tv1, tv2])           
                     
                 if view == '3CH':
                     # mitral valve
                     mv1 = landmarks['MV1'].item()
                     mv2 = landmarks['MV2'].item()
-                    LV_epi_pts = remove_valve_points(LV_epi_pts, [mv1, mv2])
-                    LV_endo_pts = remove_valve_points(LV_endo_pts, [mv1, mv2])
+                    
+                    if np.isnan(mv1).any() or np.isnan(mv2).any():
+                        pass
+                    else:
+                        LV_epi_pts = remove_valve_points(LV_epi_pts, [mv1, mv2])
+                        LV_endo_pts = remove_valve_points(LV_endo_pts, [mv1, mv2])
                     
                     # aortic valve
                     av1 = landmarks['AV1'].item()
                     av2 = landmarks['AV2'].item()
-                    LV_epi_pts = remove_valve_points(LV_epi_pts, [av1, av2])
-                    LV_endo_pts = remove_valve_points(LV_endo_pts, [av1, av2])
+                    
+                    if np.isnan(av1).any() or np.isnan(av2).any():
+                        pass
+                    else:
+                        LV_epi_pts = remove_valve_points(LV_epi_pts, [av1, av2])
+                        LV_endo_pts = remove_valve_points(LV_endo_pts, [av1, av2])
                 
                 if display:
                     try:
@@ -439,10 +569,10 @@ class GuidePointProcessing():
                                    for point in points.tolist()]
 
                         if time > 1:
-                            # write to file
-                            write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=float(time))
+                            write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
                         else:
-                            write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=float(time))
+                            write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
+            
 
     def process_landmarks(self):
 
@@ -464,13 +594,16 @@ class GuidePointProcessing():
                 rv2 = row['RV2']
 
                 # transform point
-                p1 = inverse_coordinate_transformation(rv1, S, imgOrient, ps)
-                p2 = inverse_coordinate_transformation(rv2, S, imgOrient, ps)
-
-                if time > 1:
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'RV_INSERT', slice_id, weight=1.0, phase=time)
+                if np.isnan(rv1).any() or np.isnan(rv2).any():
+                    pass
                 else:
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'RV_INSERT', slice_id, weight=1.0, phase=time)
+                    p1 = inverse_coordinate_transformation(rv1, S, imgOrient, ps)
+                    p2 = inverse_coordinate_transformation(rv2, S, imgOrient, ps)
+
+                    if time > 1:
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'RV_INSERT', slice_id, weight=1.0, phase=1.0)
+                    else:
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'RV_INSERT', slice_id, weight=1.0, phase=1.0)
             
             if view == '4CH':
                 mv1 = row['MV1']
@@ -480,20 +613,30 @@ class GuidePointProcessing():
                 lva = row['LVA']
 
                 # transform point
-                p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps)
-                p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps)
-                p3 = inverse_coordinate_transformation(tv1, S, imgOrient, ps)
-                p4 = inverse_coordinate_transformation(tv2, S, imgOrient, ps)
-                p5 = inverse_coordinate_transformation(lva, S, imgOrient, ps)
-                
-                if time > 1:
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=time)
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p3,p4], 'TRICUSPID_VALVE', slice_id, weight=1.0, phase=time)
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p5], 'APEX_POINT', slice_id, weight=1.0, phase=time)
+                if np.isnan(mv1).any() or np.isnan(mv2).any():
+                    pass
                 else:
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=time)
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p3,p4], 'TRICUSPID_VALVE', slice_id, weight=1.0, phase=time)
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p5], 'APEX_POINT', slice_id, weight=1.0, phase=time)
+                    p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps)
+                    p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps)
+                    
+                    if time > 1:
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=1.0)
+                    else:
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=1.0)
+
+                if np.isnan(tv1).any() or np.isnan(tv2).any():
+                    pass
+                else:
+                    p3 = inverse_coordinate_transformation(tv1, S, imgOrient, ps)
+                    p4 = inverse_coordinate_transformation(tv2, S, imgOrient, ps)
+                    p5 = inverse_coordinate_transformation(lva, S, imgOrient, ps)
+                
+                    if time > 1:
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p3,p4], 'TRICUSPID_VALVE', slice_id, weight=1.0, phase=1.0)
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p5], 'APEX_POINT', slice_id, weight=1.0, phase=1.0)
+                    else:
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p3,p4], 'TRICUSPID_VALVE', slice_id, weight=1.0, phase=1.0)
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p5], 'APEX_POINT', slice_id, weight=1.0, phase=1.0)
                     
             if view == '3CH':
                 mv1 = row['MV1']
@@ -502,30 +645,44 @@ class GuidePointProcessing():
                 av2 = row['AV2']
 
                 # transform point
-                p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps)
-                p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps)
-                p3 = inverse_coordinate_transformation(av1, S, imgOrient, ps)
-                p4 = inverse_coordinate_transformation(av2, S, imgOrient, ps)
-
-                if time > 1:
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=time)
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p3,p4], 'AORTA_VALVE', slice_id, weight=1.0, phase=time)
+                if np.isnan(mv1).any() or np.isnan(mv2).any():
+                    pass
                 else:
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=time)
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p3,p4], 'AORTA_VALVE', slice_id, weight=1.0, phase=time)
+                    p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps)
+                    p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps)
+
+                    if time > 1:
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=1.0)
+                    else:
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=1.0)
+                
+                # transform point
+                if np.isnan(av1).any() or np.isnan(av2).any():
+                    pass
+                else:
+                    p1 = inverse_coordinate_transformation(av1, S, imgOrient, ps)
+                    p2 = inverse_coordinate_transformation(av2, S, imgOrient, ps)
+                    
+                    if time > 1:
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p3,p4], 'AORTA_VALVE', slice_id, weight=1.0, phase=1.0)
+                    else:
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p3,p4], 'AORTA_VALVE', slice_id, weight=1.0, phase=1.0)
 
             if view == 'RVOT':
                 pv1 = row['PV1']
                 pv2 = row['PV2']
 
                 # transform point
-                p1 = inverse_coordinate_transformation(pv1, S, imgOrient, ps)
-                p2 = inverse_coordinate_transformation(pv2, S, imgOrient, ps)
+                if np.isnan(pv1).any() or np.isnan(pv2).any():
+                    pass
+                else:
+                    p1 = inverse_coordinate_transformation(pv1, S, imgOrient, ps)
+                    p2 = inverse_coordinate_transformation(pv2, S, imgOrient, ps)
 
                 if time > 1:
-                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'PULMONARY_VALVE', slice_id, weight=1.0, phase=time)
+                    write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'PULMONARY_VALVE', slice_id, weight=1.0, phase=1.0)
                 else:
-                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'PULMONARY_VALVE', slice_id, weight=1.0, phase=time)
+                    write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'PULMONARY_VALVE', slice_id, weight=1.0, phase=1.0)
 
 
     def extract_guidepoints(self, display=False):

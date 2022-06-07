@@ -43,7 +43,7 @@ class ViewSelection:
     # Class Variables
     class_labels = ['SA', '3CH', '4CH', '2CH RT', 'RVOT', 'OTHER', '2CH LT', 'LVOT']
     classes = sorted(class_labels, key=str)
-    desired_series = ['3CH', '4CH', 'SA', 'LVOT', 'RVOT']
+    desired_series = ['3CH', '4CH', 'SA', 'LVOT', 'RVOT', '2CH RT', '2CH LT']
     model_path = '../models/'
 
     # init method
@@ -121,12 +121,13 @@ class ViewSelection:
         series_instance_uid = ds.get("SeriesInstanceUID","NA")
         series_number = ds.get('SeriesNumber', 'NA')
         instance_number = str(ds.get("InstanceNumber","0"))
+        image_position_patient = str(ds.get("ImagePositionPatient", 'NA'))
 
         # load image data
         array = ds.pixel_array
 
         return patient_id, dicom_loc, modality, series_instance_uid, \
-               series_number, instance_number, array, series_description
+               series_number, instance_number, image_position_patient, array, series_description
 
     def complete_view_prediction(self):
 
@@ -154,6 +155,7 @@ class ViewSelection:
                                                      'Series ID',
                                                      'Series Number',
                                                      'Instance Number',
+                                                     'Image Position Patient', 
                                                      'Img',
                                                      'Series Description'])
 
@@ -172,6 +174,9 @@ class ViewSelection:
             series_num = new['Series Number'].iloc[0]
             series_desc = new['Series Description'].iloc[0]
             frames = len(new)
+            
+            # get frames per slice
+            frames_per_slice = int(np.mean(new['Image Position Patient'].value_counts()))
 
             # make predictions over images
             views = self.batch_predict(dataset)
@@ -182,12 +187,13 @@ class ViewSelection:
             prediction= u[count_sort_ind][0]
             conf = np.round(np.max(count) / np.sum(count), 2)
 
-            output_series.append([patient_id.upper(), series, series_num, frames, series_desc, prediction, conf])
+            output_series.append([patient_id.upper(), series, series_num, frames, frames_per_slice, series_desc, prediction, conf])
 
         output_series_df = pd.DataFrame(output_series, columns=['Patient ID',
                                                                 'Series ID',
                                                                 'Series Number',
                                                                 'Frames',
+                                                                'Frames Per Slice',
                                                                 'Series Description',
                                                                 'Predicted View',
                                                                 'Confidence'])

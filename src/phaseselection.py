@@ -49,6 +49,7 @@ class PhaseSelection:
         self.model_path = "../models/PhaseSelection/resnet50_lstm.hdf5"
         self.model = None
         self.volume = None
+        self.num_phases = 30
 
     def load_tensorflow_model(self):
 
@@ -74,6 +75,7 @@ class PhaseSelection:
                 series_instance_uid = ds.get("SeriesInstanceUID", "NA")
                 instance_number = str(ds.get("InstanceNumber", "0"))
                 slice_location = str(ds.get("SliceLocation", "NA"))
+                image_position = str(ds.get("ImagePositionPatient", "NA"))
 
                 # load image data
                 array = ds.pixel_array
@@ -85,6 +87,7 @@ class PhaseSelection:
                         series_instance_uid,
                         instance_number,
                         slice_location,
+                        image_position,
                         array,
                     ]
                 )
@@ -106,10 +109,18 @@ class PhaseSelection:
         map_dict = {}
         for i, loc in enumerate(sorted(list(set(slice_locations)))):
             map_dict[loc] = i
+            
+        # try to determine phase number
+        try:
+            self.num_phases = int(self.loaded_dcm_list[0][0x2001, 0x1017].value)
+            if self.num_phases < 30:
+                self.num_phases = 30
+        except:
+            pass
 
         # create a volume of the appropriate size
         self.volume = np.zeros(
-            (int(len(set(slice_locations))), 30, imshape[0], imshape[1], 1),
+            (int(len(set(slice_locations))), self.num_phases, imshape[0], imshape[1], 1),
             dtype=np.uint16,
         )
 
@@ -119,9 +130,9 @@ class PhaseSelection:
         for dcm in self.loaded_dcm_list:
             slice_loc = dcm[0x0020, 0x1041].value
             slice_idx = map_dict[slice_loc]
-            phase_idx = int(dcm.InstanceNumber - 30 * slice_idx) - 1
+            phase_idx = int(dcm.InstanceNumber - self.num_phases * (slice_idx)) - 1
 
-            if phase_idx > 30 or phase_idx < 0:
+            if phase_idx > self.num_phases or phase_idx < 0:
                 # will need to reverse the order of slice locations
                 map_dict = {}
                 for i, loc in enumerate(reversed(sorted(list(set(slice_locations))))):
@@ -133,7 +144,7 @@ class PhaseSelection:
                 for dcm in self.loaded_dcm_list:
                     slice_loc = dcm[0x0020, 0x1041].value
                     slice_idx = map_dict[slice_loc]
-                    phase_idx = int(dcm.InstanceNumber - 30 * slice_idx) - 1
+                    phase_idx = int(dcm.InstanceNumber - 30 * (slice_idx)) - 1
 
                     img = windowing(
                         dcm.pixel_array, window_center, window_width
@@ -171,7 +182,7 @@ class PhaseSelection:
 
             for i in range(5):
                 # load images and concatenate along batch axis
-                imgs = np.array(self.volume[keys[counter], ...]).astype(np.float32)
+                imgs = np.array(self.volume[keys[counter], :30, ...]).astype(np.float32)
                 imgs = np.roll(imgs, i * 2, 0)
 
                 frame2 = np.roll(
@@ -215,6 +226,7 @@ class PhaseSelection:
                 "Series ID",
                 "Instance ID",
                 "Slice Location",
+                "Image Position",
                 "Array",
             ],
         )
@@ -265,9 +277,9 @@ class PhaseSelection:
                             tf.squeeze(predictions_raw), -i * 2, 0
                         )
 
-                    predicted_es.append(np.argmax(np.mean(predictions, axis=0)))
+                    predicted_es.append(np.ceil(np.argmax(np.mean(predictions, axis=0))))
 
             # append to prediction dictionary
-            prediction_dictionary[series] = np.median(predicted_es)
+            prediction_dictionary[series] = int(np.ceil(np.median(predicted_es)))
 
         return prediction_dictionary

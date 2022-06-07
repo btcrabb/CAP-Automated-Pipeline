@@ -9,7 +9,7 @@ __pycache__/
 
 # Distribution / packaging
 bin/
-data/raw/
+data/
 models/
 build/
 develop-eggs/

@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
 import tensorflow as tf
+import skimage
 
 
 def loss(y_true, y_pred):
@@ -44,6 +45,10 @@ class LandmarkLocalization:
         self.heatmap_predictions = None
         self.point_predictions = None
         self.output = None
+        self.inputs = None
+        self.num_phases = 30
+        self.flip_ud = False
+        self.equalize_histogram = False
 
     def load_tensorflow_model(self, model_path=model_path):
 
@@ -78,10 +83,22 @@ class LandmarkLocalization:
             location = row['ImagePositionPatient']
             self.mapping_dict[str(location)] = slice_id
 
-    def ensure_size(self, img, size, padColor=0):
+    def ensure_size(self, img, size, padColor=0, flip=False):
+        
+        # equalize histogram
+        if self.equalize_histogram == True:            
+            p0, p98 = np.percentile(img, (0, 98))
+            img = skimage.exposure.rescale_intensity(img, in_range=(p0, p98))
+        
+        # converts image to uint8
+        img = img / np.max(img)
+        img = img*255
+        img = img.astype(np.uint8)
+        
+        if self.flip_ud == True:
+            img = np.flipud(img)
 
         # pads and image to square and resizes
-
         h, w = img.shape[:2]
         sh, sw = size
 
@@ -126,8 +143,8 @@ class LandmarkLocalization:
         # Generates a volume to store 3D + time data for each cardiac view (4CH, 3CH, RVOT, SA)
 
         # build volume to store data
-        slices = len(self.mapping_dict.keys())
-        self.volume = np.zeros((slices, 30, 256, 256, 1), dtype=np.uint16)
+        slices = len(self.mapping_dict.keys()) + 2
+        self.volume = np.zeros((slices, self.num_phases, 256, 256, 1), dtype=np.uint16)
 
         # find associated dicoms
         loaded_dcm_dict = {}
@@ -157,9 +174,13 @@ class LandmarkLocalization:
                     # add to volume
                     self.volume[slice_id, phase_number, :, :, 0] = self.ensure_size(dcm.pixel_array, (256, 256))
             except:
-                print('Unable to copy pixel array to volume. Likely caused by an incorrect phase number, check that your list of dicoms is correct')
+                print('Unable to copy pixel array to volume. Likely caused by an incorrect phase number, check that your list of dicoms is correct\n')
+                print('Information: ')
                 print('Phase: ', phase_number)
                 print('Slice number: ', slice_id)
+                
+                print('\nPossible sources of error: \nDuplicate series listed in slice info file (the dicoms are duplicated and stored in two places')
+                print('The number of phases per slice is incorrect, or inconsistent between views')
 
     def predict_landmarks(self, phase=0):
 
@@ -181,7 +202,9 @@ class LandmarkLocalization:
                 slice_id = row['Slice ID']
                 mri_slice = self.volume[slice_id, ...]
                 # print('Slice ID - {} for location {}'.format(slice_id, row['Slice Location']))
-
+                
+                # ensure all of mri_slice is defined (applicable if some series only have 20 phases, while others have 30)
+                
                 # perform prediction at one phase
                 # create rolled input
                 f0 = np.roll(mri_slice, -2, axis=0)[phase, :, :, 0]
@@ -193,11 +216,16 @@ class LandmarkLocalization:
                 inputs = np.stack([f0, f1, f2, f3, f4], axis=-1)
                 img = inputs / np.amax(inputs)
                 img = tf.expand_dims(tf.convert_to_tensor(img, dtype=tf.float32), 0)
+                self.inputs = img
                 self.heatmap_predictions = self.model.predict(img)
+                
+                if self.flip_ud == True:
+                    self.heatmap_predictions['outputs'] =  np.flip(self.heatmap_predictions['outputs'],axis=1)
+                    
 
                 # mask borders of predictions
-                self.heatmap_predictions['outputs'][:, :5, :5, :] = 0
-                self.heatmap_predictions['outputs'][:, -5:, -5:, :] = 0
+                self.heatmap_predictions['outputs'][:, :10, :10, :] = 0
+                self.heatmap_predictions['outputs'][:, -10:, -10:, :] = 0
 
                 # Extract point from heatmap and append each prediction to output df
                 self.point_predictions = [slice_id, self.view, phase]
@@ -205,7 +233,11 @@ class LandmarkLocalization:
 
                     landmark = np.where(self.heatmap_predictions['outputs'][0, :, :, i] ==
                               np.max(self.heatmap_predictions['outputs'][0, :, :, i]))
-                    self.point_predictions.append(landmark)
+                    
+                    if landmark[0] == 0 or landmark[0] == 255:
+                        self.point_predictions.append(None)
+                    else:
+                        self.point_predictions.append(landmark)
 
                 self.output.append(self.point_predictions)
 
