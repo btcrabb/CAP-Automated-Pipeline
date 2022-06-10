@@ -650,9 +650,7 @@ class Contours():
                         'LAX_EPICARDIAL', 
 
                         'LAX_EPICARDIAL', 
-                        'LAX_RV_FREEWALL',
-                        'SAX_RV_FREEWALL',
-                        'SAX_EPICARDIAL']
+                        'LAX_RV_FREEWALL']
 
 
 
