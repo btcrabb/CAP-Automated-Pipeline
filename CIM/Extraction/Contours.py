@@ -1,14 +1,17 @@
 ﻿#!/usr/bin/env python3
 
+import numpy as np
+
 from scipy.spatial import ckdtree
-
-import sys
-sys.path.append( '../BiV_Modelling_v2' ) # path to where the BiVFitting folder is located
-from BiVFitting import Frame,Point
-
+#from BiVFitting import Frame, Point
 import warnings
 import os
-import numpy as np
+import sys
+import sys
+# insert at 1, 0 is the script path (or '' in REPL)
+sys.path.insert(1, 'C:/Users/ldt18/Desktop/Dev_BioBank/BiVFitting')
+
+from Frame import Frame, Point
 
 class Contours():
     def __init__(self, dict_of_points =None, dict_of_frame=None,
@@ -619,39 +622,71 @@ class Contours():
             time_frame = self.list_time_frames()
         if not isinstance(time_frame,list):
             time_frame = [time_frame]
-        valve_contours = ['LAX_RV_EXTENT',
-                          'LAX_RV_EXTENT',
-                          'LAX_LV_EXTENT']
-        lax_contours = ['LAX_RV_FREEWALL',
-                        'LAX_RV_ENDOCARDIAL',
-                        'LAX_LV_ENDOCARDIAL']
+        
+        valve_contours = ['MITRAL_VALVE',
+                        'MITRAL_VALVE',
+
+                        'AORTA_VALVE',
+                        'AORTA_VALVE', 
+
+                        'TRICUSPID_VALVE',
+                        'TRICUSPID_VALVE',
+                        'TRICUSPID_VALVE', 
+
+                        'PULMONARY_VALVE',
+                        'PULMONARY_VALVE',
+                        'PULMONARY_VALVE',
+                        'PULMONARY_VALVE']
+
+
+        lax_contours = ['LAX_LV_ENDOCARDIAL',
+                        'LAX_EPICARDIAL',
+
+                        'LAX_LV_ENDOCARDIAL',
+                        'LAX_EPICARDIAL',
+
+                        'LAX_RV_FREEWALL',
+                        'LAX_RV_SEPTUM',
+                        'LAX_EPICARDIAL', 
+
+                        'LAX_EPICARDIAL', 
+                        'LAX_RV_FREEWALL',
+                        'SAX_RV_FREEWALL',
+                        'SAX_EPICARDIAL']
+
+
 
         for time in time_frame:
             frames = self.list_frame_uids_at_timeframe(time)
+            
             for index, contour in enumerate(lax_contours):
                 delete_index = []
                 for frame in frames:
-                    pc_index,contour_points = self.get_frame_points(contour,
-                                                                   frame)
+                        pc_index,contour_points = self.get_frame_points(contour,
+                                                                    frame)
 
-                    _,extent_points = self.get_frame_points(
-                        valve_contours[index], frame)
-                    if len(extent_points) == 3:
-
-                        valve_dist = np.linalg.norm(
-                            extent_points[1].coordinates -
-                            extent_points[0].coordinates)
-                        for p_index,point in enumerate(contour_points):
-                            distance1 =np.linalg.norm(
+                        _,extent_points = self.get_frame_points(
+                            valve_contours[index], frame)
+                        if len(extent_points) == 2:
+                            valve_dist = np.linalg.norm(
                                 extent_points[1].coordinates -
-                                 point.coordinates)
-                            distance2 = np.linalg.norm(
-                                extent_points[0].coordinates
-                                 - point.coordinates)
-                            point_dist = distance1+ distance2
-                            if abs(point_dist - valve_dist) < 3:
-                                delete_index.append(pc_index[p_index])
+                                extent_points[0].coordinates)
+
+                            for p_index,point in enumerate(contour_points):
+                                distance1 =np.linalg.norm(
+                                    extent_points[1].coordinates -
+                                    point.coordinates)
+                                distance2 = np.linalg.norm(
+                                    extent_points[0].coordinates
+                                    - point.coordinates)    
+                                point_dist = distance1+ distance2
+                                if abs(point_dist - valve_dist) < 10:
+
+                                    delete_index.append(pc_index[p_index])
+                
+                
                 self.delete_point(contour,delete_index)
+
 
     def find_frame_septum(self, frame_uid, tol = None):
 
@@ -1129,7 +1164,7 @@ class Contours():
 
     def define_apex_landmark(self, time_frame =None):
         """
-        When LV extent is not defined ht eapez is computed as
+        When LV extent is not defined the apex is computed as
         (slice_min - slice_int) as the apex slice position,
         and use the center of LV contour on slice_min as the in-plate position
         """
