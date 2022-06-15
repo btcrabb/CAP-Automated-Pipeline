@@ -25,7 +25,7 @@ def write_to_gp_file(path, coords, label, slice_id, weight=1.0, phase=1.0):
             f.write('{:.5f}\t{:.5f}\t{:.5f}\t{}\t{}\t{}\t{}\n'.format(coord[0], coord[1], coord[2],
                                                           label, slice_id, weight, phase))
 
-def inverse_coordinate_transformation(coordinate, imagePositionPatient, imageOrientationPatient, ps):
+def inverse_coordinate_transformation(coordinate, imagePositionPatient, imageOrientationPatient, ps, size=[256,256]):
 
     """ Performs a coordinate transformation from image coordinates to patient coordinates """
 
@@ -33,19 +33,22 @@ def inverse_coordinate_transformation(coordinate, imagePositionPatient, imageOri
     S = imagePositionPatient
     X = imageOrientationPatient[:3]
     Y = imageOrientationPatient[3:]
-    
+
     # construct affine transform
     M = np.asarray([[X[0]*ps[0], Y[0]*ps[1], 0, S[0]],
                 [X[1]*ps[0], Y[1]*ps[1], 0, S[1]],
                 [X[2]*ps[0], Y[2]*ps[1], 0, S[2]],
                 [0, 0, 0, 1]])
+
+    ratio_x = size[0] / 256
+    ratio_y = size[1] / 256
     
     # expand dimensions of coordinate
     pos = [float(x) for x in coordinate[0:3]]
-    coord = [pos[1], pos[0], 0, 1.0]
+    coord = np.array([pos[1]*ratio_x, pos[0]*ratio_y, 0, 1.0])
     
     # perform transformation and return as list
-    return [np.round(x,5) for x in M @ coord]
+    return [np.round(x,5) for x in M @ coord.T]
 
 def remove_valve_points(point_list, landmarks):
     
@@ -145,9 +148,10 @@ class GuidePointProcessing():
         for file in self.sa_seg_files:
 
             # change input name to include modality info (nnUnet formatting)
-            view, slice_id, time = file.split('/')[-1].split('_')
+            file = os.path.normpath(file)
+            view, slice_id, time = file.split(os.sep)[-1].split('_')
             time = int(time.split('.')[0])
-            prefix = file.split('/')[-1].split('.')
+            prefix = file.split(os.sep)[-1].split('.')
             input_name = 'SA/' + prefix[0]  + '_0000.' + prefix[1] + '.' + prefix[2]
             
             segmentation = nib.load(file).get_fdata().T[0,:,:].T
@@ -158,6 +162,7 @@ class GuidePointProcessing():
             S = _slice_info['ImagePositionPatient'].values[0]
             imgOrient = _slice_info['ImageOrientationPatient'].values[0]
             ps = _slice_info['Pixel Spacing'].values[0]
+            size = _slice_info['Size'].values[0]
 
             # extract points
             LV_endo = (segmentation == 1).astype(np.uint8)
@@ -195,6 +200,8 @@ class GuidePointProcessing():
 
                 if len(pairs) > 0:
                     RV_septal_pts = RV_endo_pts[np.unique(pairs[:,0])] # deletes intersection from RV endo pts
+                    RV_endo_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_endo_pts) if i not in np.unique(pairs[:,0])], 
+                                          dtype=np.int64)
 
             # Get intersection points between RV epi and LV epi
             if len(RV_epi_pts)>0 and len(LV_epi_pts)>0:
@@ -239,7 +246,7 @@ class GuidePointProcessing():
 
             for i,points in enumerate(point_lists):
                 if len(points)>2:
-                    pts = [inverse_coordinate_transformation(point, S, imgOrient, ps)
+                    pts = [inverse_coordinate_transformation(point, S, imgOrient, ps, size=size)
                                for point in points.tolist()]
 
                     if time > 1:
@@ -255,9 +262,10 @@ class GuidePointProcessing():
         for file in self.la_seg_files:
     
             # change input name to include modality info (nnUnet formatting)
-            view, slice_id, time = file.split('/')[-1].split('_')
+            file = os.path.normpath(file)
+            view, slice_id, time = file.split(os.sep)[-1].split('_')
             time = int(time.split('.')[0])
-            prefix = file.split('/')[-1].split('.')
+            prefix = file.split(os.sep)[-1].split('.')
             input_name = '{}/'.format(view) + prefix[0]  + '_0000.' + prefix[1] + '.' + prefix[2]
             
             segmentation = nib.load(file).get_fdata().T[0,:,:].T
@@ -271,6 +279,7 @@ class GuidePointProcessing():
                 S = _slice_info['ImagePositionPatient'].values[0]
                 imgOrient = _slice_info['ImageOrientationPatient'].values[0]
                 ps = _slice_info['Pixel Spacing'].values[0]
+                size = _slice_info['Size'].values[0]
 
                 # extract points
                 RV_endo = (segmentation == 1).astype(np.uint8)
@@ -348,7 +357,7 @@ class GuidePointProcessing():
 
                 for i,points in enumerate(point_lists):
                     if len(points)>2:
-                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps)
+                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps, size=size)
                                    for point in points.tolist()]
 
                         if time > 1:
@@ -365,6 +374,7 @@ class GuidePointProcessing():
                 S = _slice_info['ImagePositionPatient'].values[0]
                 imgOrient = _slice_info['ImageOrientationPatient'].values[0]
                 ps = _slice_info['Pixel Spacing'].values[0]
+                size = _slice_info['Size'].values[0]
 
                 # extract points
                 RV_endo = (segmentation == 1).astype(np.uint8)
@@ -427,7 +437,7 @@ class GuidePointProcessing():
 
                 for i,points in enumerate(point_lists):
                     if len(points)>2:
-                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps)
+                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps, size=size)
                                    for point in points.tolist()]
 
                         if time > 1:
@@ -443,6 +453,7 @@ class GuidePointProcessing():
                 S = _slice_info['ImagePositionPatient'].values[0]
                 imgOrient = _slice_info['ImageOrientationPatient'].values[0]
                 ps = _slice_info['Pixel Spacing'].values[0]
+                size = _slice_info['Size'].values[0]
 
                 # extract points
                 LV_endo = (segmentation == 1).astype(np.uint8)
@@ -475,6 +486,8 @@ class GuidePointProcessing():
 
                     if len(pairs) > 0:
                         RV_septal_pts = RV_endo_pts[np.unique(pairs[:,0])] # deletes intersection from RV endo pts
+                        RV_endo_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_endo_pts) if i not in np.unique(pairs[:,0])], 
+                                          dtype=np.int64)
 
                 # Get intersection points between RV epi and LV epi
                 if len(RV_epi_pts)>0 and len(LV_epi_pts)>0:
@@ -547,6 +560,14 @@ class GuidePointProcessing():
                         plt.scatter(LV_endo_pts[:,1], LV_endo_pts[:,0], s=5, c='#87E911')
                         plt.scatter(mv1[1], mv1[0])
                         plt.scatter(mv2[1], mv2[0])
+
+                        if view == '3CH':
+                            plt.scatter(av1[1], av1[0])
+                            plt.scatter(av2[1], av2[0])
+                        if view == '4CH':
+                            plt.scatter(tv1[1], tv1[0])
+                            plt.scatter(tv2[1], tv2[0])
+                            
                         plt.show()
                     except:
                         pass
@@ -565,7 +586,7 @@ class GuidePointProcessing():
 
                 for i,points in enumerate(point_lists):
                     if len(points)>2:
-                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps)
+                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps, size=size)
                                    for point in points.tolist()]
 
                         if time > 1:
@@ -578,6 +599,23 @@ class GuidePointProcessing():
 
         """ Extracts the landmark points and writes to guide point file """
 
+        # Get min and max short-axis slice IDs
+        sax_df = self.landmarks_df[self.landmarks_df['View'] == 'SA']
+        sax_slice_ids = sax_df['Slice ID']
+
+        # map to slice locations
+        sax_slice_info = self.slice_info_df[self.slice_info_df['Slice ID'].isin(sax_slice_ids)]
+
+        min_slice_loc = np.min(sax_slice_info['Slice Location'])
+        max_slice_loc = np.max(sax_slice_info['Slice Location'])
+
+        min_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == min_slice_loc]['Slice ID'])
+        max_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == max_slice_loc]['Slice ID'])
+
+        print(min_sax_slice_id)
+        print(max_sax_slice_id)
+
+
         for i, row in self.landmarks_df.iterrows():
             slice_id = row['Slice ID']
             view = row['View']
@@ -588,6 +626,7 @@ class GuidePointProcessing():
             S = slice_row['ImagePositionPatient'].values[0]
             imgOrient = slice_row['ImageOrientationPatient'].values[0]
             ps = slice_row['Pixel Spacing'].values[0]
+            size = slice_row['Size'].values[0]
             
             if view == 'SA':
                 rv1 = row['RV1']
@@ -596,9 +635,11 @@ class GuidePointProcessing():
                 # transform point
                 if np.isnan(rv1).any() or np.isnan(rv2).any():
                     pass
+                elif slice_id == min_sax_slice_id or slice_id == max_sax_slice_id:
+                    pass
                 else:
-                    p1 = inverse_coordinate_transformation(rv1, S, imgOrient, ps)
-                    p2 = inverse_coordinate_transformation(rv2, S, imgOrient, ps)
+                    p1 = inverse_coordinate_transformation(rv1, S, imgOrient, ps, size=size)
+                    p2 = inverse_coordinate_transformation(rv2, S, imgOrient, ps, size=size)
 
                     if time > 1:
                         write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'RV_INSERT', slice_id, weight=1.0, phase=1.0)
@@ -616,8 +657,8 @@ class GuidePointProcessing():
                 if np.isnan(mv1).any() or np.isnan(mv2).any():
                     pass
                 else:
-                    p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps)
-                    p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps)
+                    p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps, size=size)
+                    p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps, size=size)
                     
                     if time > 1:
                         write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=1.0)
@@ -627,9 +668,9 @@ class GuidePointProcessing():
                 if np.isnan(tv1).any() or np.isnan(tv2).any():
                     pass
                 else:
-                    p3 = inverse_coordinate_transformation(tv1, S, imgOrient, ps)
-                    p4 = inverse_coordinate_transformation(tv2, S, imgOrient, ps)
-                    p5 = inverse_coordinate_transformation(lva, S, imgOrient, ps)
+                    p3 = inverse_coordinate_transformation(tv1, S, imgOrient, ps, size=size)
+                    p4 = inverse_coordinate_transformation(tv2, S, imgOrient, ps, size=size)
+                    p5 = inverse_coordinate_transformation(lva, S, imgOrient, ps, size=size)
                 
                     if time > 1:
                         write_to_gp_file(self.output_folder + '/GP_ES.txt', [p3,p4], 'TRICUSPID_VALVE', slice_id, weight=1.0, phase=1.0)
@@ -648,8 +689,8 @@ class GuidePointProcessing():
                 if np.isnan(mv1).any() or np.isnan(mv2).any():
                     pass
                 else:
-                    p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps)
-                    p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps)
+                    p1 = inverse_coordinate_transformation(mv1, S, imgOrient, ps, size=size)
+                    p2 = inverse_coordinate_transformation(mv2, S, imgOrient, ps, size=size)
 
                     if time > 1:
                         write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'MITRAL_VALVE', slice_id, weight=1.0, phase=1.0)
@@ -660,13 +701,13 @@ class GuidePointProcessing():
                 if np.isnan(av1).any() or np.isnan(av2).any():
                     pass
                 else:
-                    p1 = inverse_coordinate_transformation(av1, S, imgOrient, ps)
-                    p2 = inverse_coordinate_transformation(av2, S, imgOrient, ps)
+                    p1 = inverse_coordinate_transformation(av1, S, imgOrient, ps, size=size)
+                    p2 = inverse_coordinate_transformation(av2, S, imgOrient, ps, size=size)
                     
                     if time > 1:
-                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p3,p4], 'AORTA_VALVE', slice_id, weight=1.0, phase=1.0)
+                        write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'AORTA_VALVE', slice_id, weight=1.0, phase=1.0)
                     else:
-                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p3,p4], 'AORTA_VALVE', slice_id, weight=1.0, phase=1.0)
+                        write_to_gp_file(self.output_folder + '/GP_ED.txt', [p1,p2], 'AORTA_VALVE', slice_id, weight=1.0, phase=1.0)
 
             if view == 'RVOT':
                 pv1 = row['PV1']
@@ -676,8 +717,8 @@ class GuidePointProcessing():
                 if np.isnan(pv1).any() or np.isnan(pv2).any():
                     pass
                 else:
-                    p1 = inverse_coordinate_transformation(pv1, S, imgOrient, ps)
-                    p2 = inverse_coordinate_transformation(pv2, S, imgOrient, ps)
+                    p1 = inverse_coordinate_transformation(pv1, S, imgOrient, ps, size=size)
+                    p2 = inverse_coordinate_transformation(pv2, S, imgOrient, ps, size=size)
 
                 if time > 1:
                     write_to_gp_file(self.output_folder + '/GP_ES.txt', [p1,p2], 'PULMONARY_VALVE', slice_id, weight=1.0, phase=1.0)

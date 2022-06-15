@@ -200,10 +200,7 @@ class ViewSelection:
 
         if self.create_csv:
             # print('Saving .csv file with series predictions and info')
-            if os.path.exists(self.csv_path):
-                output_series_df.to_csv(self.csv_path, mode='a', header=False, index=False)
-            else:
-                output_series_df.to_csv(self.csv_path, mode='a', index=False)
+            output_series_df.to_csv(self.csv_path, mode='w', index=False)
             # print('Done!')
 
         if self.save_files:
