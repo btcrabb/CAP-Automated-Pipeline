@@ -1,8 +1,8 @@
 MR.2.16.124.113543.6006.99.2452881189496296094.4.dcm	frameID:	4	timeFrame	1	ImagePositionPatient	-150.456	-45.280	205.447	ImageOrientationPatient	0.896	-0.318	-0.310	0.012	0.715	-0.699	PixelSpacing	nan	1.328
 MR.2.16.124.113543.6006.99.03054375766431452189.13.dcm	frameID:	5	timeFrame	1	ImagePositionPatient	-155.027	48.530	196.740	ImageOrientationPatient	0.975	-0.220	0.000	-0.000	-0.000	-1.000	PixelSpacing	nan	1.250
-MR.2.16.124.113543.6006.99.2449748809904494295.13.dcm	frameID:	8	timeFrame	1	ImagePositionPatient	-168.466	-71.927	25.189	ImageOrientationPatient	0.892	-0.317	-0.322	0.437	0.789	0.432	PixelSpacing	nan	1.289
+MR.2.16.124.113543.6006.99.2449748809904494295.119.dcm	frameID:	6	timeFrame	1	ImagePositionPatient	-171.289	-59.311	4.969	ImageOrientationPatient	0.892	-0.317	-0.322	0.437	0.789	0.432	PixelSpacing	nan	1.289
+MR.2.16.124.113543.6006.99.2449748809904494295.90.dcm	frameID:	7	timeFrame	1	ImagePositionPatient	-170.348	-63.516	11.709	ImageOrientationPatient	0.892	-0.317	-0.322	0.437	0.789	0.432	PixelSpacing	nan	1.289
 MR.2.16.124.113543.6006.99.5949919243426529217.13.dcm	frameID:	10	timeFrame	1	ImagePositionPatient	-151.059	45.771	199.887	ImageOrientationPatient	0.981	-0.192	0.023	-0.017	-0.205	-0.979	PixelSpacing	nan	1.250
-MR.2.16.124.113543.6006.99.2436115269685589069.123.dcm	frameID:	13	timeFrame	1	ImagePositionPatient	-57.206	-268.651	69.437	ImageOrientationPatient	0.440	0.713	0.546	-0.048	0.626	-0.779	PixelSpacing	nan	1.562
 MR.2.16.124.113543.6006.99.2436115269685589069.243.dcm	frameID:	19	timeFrame	1	ImagePositionPatient	-24.929	-280.056	58.297	ImageOrientationPatient	0.440	0.713	0.546	-0.048	0.626	-0.779	PixelSpacing	nan	1.562
 MR.2.16.124.113543.6006.99.2436115269685589069.310.dcm	frameID:	21	timeFrame	1	ImagePositionPatient	-8.790	-285.758	52.726	ImageOrientationPatient	0.440	0.713	0.546	-0.048	0.626	-0.779	PixelSpacing	nan	1.562
 MR.2.16.124.113543.6006.99.2436115269685589069.207.dcm	frameID:	23	timeFrame	1	ImagePositionPatient	-41.068	-274.353	63.867	ImageOrientationPatient	0.440	0.713	0.546	-0.048	0.626	-0.779	PixelSpacing	nan	1.562

@@ -1,9 +1,14 @@
 ﻿#!/usr/bin/env python3
 
+import os
+import sys
 import numpy as np
 
 from scipy.spatial import ckdtree
-#from BiVFitting import Frame, Point
+module_path = os.path.abspath(os.path.join('../BiV_Modelling_v2'))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+from BiVFitting import Frame, Point
 import warnings
 import os
 import sys
@@ -11,7 +16,7 @@ import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, 'C:/Users/ldt18/Desktop/Dev_BioBank/BiVFitting')
 
-from Frame import Frame, Point
+#from Frame import Frame, Point
 
 class Contours():
     def __init__(self, dict_of_points =None, dict_of_frame=None,

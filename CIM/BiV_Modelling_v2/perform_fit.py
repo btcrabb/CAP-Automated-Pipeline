@@ -23,20 +23,20 @@ contours_to_plot = [ContourType.LAX_RA, ContourType.LAX_RV_ENDOCARDIAL,
                     ContourType.SAX_RV_SEPTUM, ContourType.LAX_RV_SEPTUM,
                     ContourType.SAX_LV_ENDOCARDIAL,
                     ContourType.SAX_LV_EPICARDIAL, ContourType.RV_INSERT,
-                    ContourType.APEX_POINT, ContourType.MITRAL_VALVE,
+                    ContourType.APEX_POINT, ContourType.MITRAL_VALVE, ContourType.PULMONARY_VALVE,
                     ContourType.TRICUSPID_VALVE, ContourType.AORTA_VALVE,
                     ContourType.SAX_RV_EPICARDIAL, ContourType.LAX_RV_EPICARDIAL,
                     ContourType.LAX_LV_ENDOCARDIAL, ContourType.LAX_LV_EPICARDIAL,
                     ContourType.LAX_RV_EPICARDIAL, ContourType.SAX_RV_OUTLET,
                     ContourType.AORTA_PHANTOM, ContourType.TRICUSPID_PHANTOM,
-                    ContourType.MITRAL_PHANTOM
+                    ContourType.MITRAL_PHANTOM, ContourType.PULMONARY_PHANTOM
                     ]
 
 def perform_fitting(folder, **kwargs):
     #performs all the BiVentricular fitting operations
-    frames = ['ES', 'ED']
+    frames = ['ED', 'ES']
     for frame in frames:
-        try:
+        #try:
                 
             if 'id_Frame' in kwargs:
                 # acquire .csv file containing patient_id, ES frame number, ED frame number if present
@@ -46,6 +46,8 @@ def perform_fitting(folder, **kwargs):
             # THIS SHOULD BE CHANGED if files are named differently
             filename = os.path.join(folder, 'GPFile'+frame+'_ldt.txt') 
             filenameInfo = os.path.join(folder,'SliceInfoFile_ldt.txt')
+
+            print(filename)
 
             # extract the patient name from the folder name
             case =  os.path.basename(os.path.normpath(folder))
@@ -66,7 +68,8 @@ def perform_fitting(folder, **kwargs):
 
             #read all the frames from the GPFile 
             all_frames = pd.read_csv(filename, sep = '\t')
-            frames_to_fit = np.unique([i[6] for i in all_frames.values])                
+            frames_to_fit = np.unique([i[6] for i in all_frames.values])   
+            print(frames_to_fit)             
 
             # The next lines are used to measure shift using only a key frame
             if measure_shift_EDonly == True:
@@ -163,6 +166,7 @@ def perform_fitting(folder, **kwargs):
 
                     mitral_points = data_set.create_valve_phantom_points(30, ContourType.MITRAL_VALVE)
                     tri_points = data_set.create_valve_phantom_points(30, ContourType.TRICUSPID_VALVE)
+                    print('Pulmonary phantom: \n')
                     pulmonary_points = data_set.create_valve_phantom_points(20, ContourType.PULMONARY_VALVE)
                     aorta_points = data_set.create_valve_phantom_points(20, ContourType.AORTA_VALVE)
                 
@@ -212,8 +216,8 @@ def perform_fitting(folder, **kwargs):
             DoneFile = Path(os.path.join(output_folder ,'Done.txt'))
             DoneFile.touch(exist_ok=True)   
 
-        except KeyboardInterrupt:
-            raise KeyboardInterruptError()
+        #except KeyboardInterrupt:
+        #    raise KeyboardInterruptError()
 
 
 
@@ -225,7 +229,7 @@ if __name__ == '__main__':
     #pid = os.getpid()
     #os.system("taskset -cp %d %d" %(66, pid))
 
-    main_path = '.'          ### folder in use
+    main_path = 'E:/CAP/CAP-FullAutomation/CIM/BiV_Modelling_v2/'          ### folder in use
 
     cases_folder = os.path.join(main_path, 'test_data')
     cases_list = [os.path.join(cases_folder, batch) for batch in os.listdir(cases_folder)]

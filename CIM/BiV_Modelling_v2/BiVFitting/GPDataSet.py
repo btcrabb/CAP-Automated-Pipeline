@@ -498,8 +498,8 @@ class GPDataSet(object):
         #  the valve points will be created using an cercle
         # in case of 3 and more an elipsoid will be fitted.
         valid_points = False
-        if max(distance) > 10 and len(valve_points)< 3: #(R.B)
-        #if len(valve_points) < 3: (A.M)
+        #if max(distance) > 10 and len(valve_points)< 3: #(R.B)
+        if len(valve_points) < 3: # (A.M)
             valid_points = True
 
         
@@ -523,16 +523,16 @@ class GPDataSet(object):
             P_mean = 0.5 * (control_point1 + control_point2)
             u = (control_point1 - control_point2)/\
                 np.linalg.norm(control_point1 - control_point2)
-            # angle1 = np.arccos(np.dot(u, v1))
-            # angle2 =np.arccos(np.dot(u,v2))
+            angle1 = np.arccos(np.dot(u, v1))
+            angle2 =np.arccos(np.dot(u,v2))
             # if just two pints are used sometimes the valve are
             # perpendicular to the
             # RV/LV slice
             # In this case use V2 to comput the valve normal
-            normal_valve = np.cross(normal, u) #if angle1 > angle2 \
-                #else np.cross(v2, u)
+            normal_valve = np.cross(normal, u) # if angle1 > angle2 \
+                # else np.cross(v2, u)
             if contour_type == ContourType.PULMONARY_VALVE:
-                normal_valve = np.cross(v1,v2)
+                normal_valve = np.cross(normal,u) # (Changed by B.C, 6/15/22)
             t = np.linspace(-np.pi, np.pi, n)
             new_points = tools.generate_2Delipse_by_vectors(t, [0,0], r)
 

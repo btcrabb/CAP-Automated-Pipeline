@@ -41,7 +41,7 @@ def CleanGPFile(folder, **kwargs):
     frames = ['ES', 'ED']
 
     for frame in frames:
-        contour_file = os.path.join(folder, 'GP_'+frame+'_ldt.txt') 
+        contour_file = os.path.join(folder, 'GP_'+frame+'.txt') 
         metadata_file = os.path.join(folder,'SliceInfo.txt')
         
         time_frames = [1]   #ED and ES frames for this example case, taken from SciReport
@@ -56,8 +56,8 @@ def CleanGPFile(folder, **kwargs):
         cvi_cont = CVI42XML()
         cvi_cont.contour = contours
 
-        output_gpfile = os.path.join('../proc_data/'+os.path.basename(folder),'GPFile'+frame+'_ldt.txt')
-        output_metafile = os.path.join('../proc_data/'+os.path.basename(folder),'SliceInfoFile_ldt.txt')
+        output_gpfile = os.path.join('../BiV_Modelling_v2/test_data/'+os.path.basename(folder),'GPFile'+frame+'_ldt.txt')
+        output_metafile = os.path.join('../BiV_Modelling_v2/test_data/'+os.path.basename(folder),'SliceInfoFile_ldt.txt')
 
 
         cvi_cont.export_contour_points(output_gpfile)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     workers = 1 # number of CPUs to be used in parallel to process the data
 
     # Create some data
-    working_dir = '../'   #edit to your relative path to this data
+    working_dir = '../BiV_Modelling_v2/'   #edit to your relative path to this data
 
     cases_folder = os.path.join(working_dir, 'test_data')
     cases_list = [os.path.join(cases_folder, batch) for batch in os.listdir(cases_folder)]

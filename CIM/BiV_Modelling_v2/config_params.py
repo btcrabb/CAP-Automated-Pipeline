@@ -17,8 +17,8 @@ measure_shift_EDonly = True # do you want to measure ED shift only at ED?
 
 # the following lines contain the set pof weights used by the
 # MultiThreadSmoothingED() and SolveProblemCVXOPT() functions
-weight_GP = 200 #100 #200
-low_smoothing_weight = 1e4 #1e3 #1e4
+weight_GP = 100 #100 #200
+low_smoothing_weight = 1e6 #1e3 #1e4
 transmural_weight =  0.01 #1e3 #0.01
  
 #set the sampling to be used by the GPDataset() module
