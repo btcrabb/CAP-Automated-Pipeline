@@ -1,24 +1,25 @@
 Log for patient: CHD4698202
 
 FRAME #1
-     Iteration #1 Weight 1000000000000.0	 ICF error 2.6500991903880915
-     Iteration #2 Weight 200000000000.0	 ICF error 2.5357864386595184
-     Iteration #3 Weight 40000000000.0	 ICF error 2.454307530981771
-     Iteration #4 Weight 8000000000.0	 ICF error 2.341800874630419
-     Iteration #5 Weight 1600000000.0	 ICF error 2.2971380487568323
-     Iteration #6 Weight 320000000.0	 ICF error 2.2538232975320667
-     Iteration #7 Weight 64000000.0	 ICF error 2.2113535294649838
-     Iteration #8 Weight 12800000.0	 ICF error 2.0843089614491186
-     Iteration #9 Weight 2560000.0	 ICF error 1.8884932845678954
-     Iteration #10 Weight 512000.0	 ICF error 1.650933325410681
-     Iteration #11 Weight 102400.0	 ICF error 1.4080108830964257
-     Iteration #12 Weight 256000.0	 ICF error 1.4080108830964257
-     Iteration #13 Weight 320000.0	 ICF error 1.4080108830964257
-     Iteration #14 Weight 200000.0	 ICF error 1.4080108830964257
+     Iteration #1 Weight 1000000000000.0	 ICF error 2.5883167856433316
+     Iteration #2 Weight 200000000000.0	 ICF error 2.5384890048972832
+     Iteration #3 Weight 40000000000.0	 ICF error 2.4179173891358317
+     Iteration #4 Weight 8000000000.0	 ICF error 2.327663336636506
+     Iteration #5 Weight 1600000000.0	 ICF error 2.268411362547867
+     Iteration #6 Weight 320000000.0	 ICF error 2.2214869633881524
+     Iteration #7 Weight 64000000.0	 ICF error 2.166154442821802
+     Iteration #8 Weight 12800000.0	 ICF error 2.0469439792436948
+     Iteration #9 Weight 2560000.0	 ICF error 1.8292707793188447
+     Iteration #10 Weight 512000.0	 ICF error 1.6039472603247016
+     Iteration #11 Weight 102400.0	 ICF error 1.370469606275402
+     Iteration #12 Weight 256000.0	 ICF error 1.370469606275402
+     Iteration #13 Weight 102400.0	 ICF error 1.250210980616122
+     Iteration #14 Weight 128000.0	 ICF error 1.250210980616122
+     Iteration #15 Weight 80000.0	 ICF error 1.250210980616122
 End of the implicitly constrained fit 
---- 8.745862483978271 seconds ---
-     Iteration #1 Smoothing weight 1000000.0	 ECF error 1.4080108830964257
-     Iteration #2 Smoothing weight 1000000.0	 ECF error 1.3454393552426878
-     Iteration #3 Smoothing weight 1000000.0	 ECF error 1.3448741904247636
+--- 10.48732042312622 seconds ---
+     Iteration #1 Smoothing weight 1000000.0	 ECF error 1.250210980616122
+     Iteration #2 Smoothing weight 1000000.0	 ECF error 1.2282389831375997
+     Iteration #3 Smoothing weight 1000000.0	 ECF error 1.2282367253072584
 End of the implicitly constrained fit 
---- 22.341498613357544 seconds ---
+--- 42.14970350265503 seconds ---

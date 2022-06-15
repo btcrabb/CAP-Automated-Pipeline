@@ -1,0 +1,8 @@
+MR.2.16.124.113543.6006.99.3802999294062033722.57.dcm	frameID:	0	timeFrame	1	ImagePositionPatient	77.834	-184.609	201.445	ImageOrientationPatient	-0.352	0.935	-0.050	0.018	-0.047	-0.999	PixelSpacing	nan	1.484
+MR.2.16.124.113543.6006.99.3752509202375374983.10.dcm	frameID:	5	timeFrame	1	ImagePositionPatient	3.648	-274.022	6.310	ImageOrientationPatient	0.623	0.573	-0.533	-0.517	0.812	0.269	PixelSpacing	nan	1.562
+MR.2.16.124.113543.6006.99.3749547607126315046.5.dcm	frameID:	6	timeFrame	1	ImagePositionPatient	-160.807	78.306	162.730	ImageOrientationPatient	0.858	-0.514	-0.000	0.003	0.004	-1.000	PixelSpacing	nan	1.562
+MR.2.16.124.113543.6006.99.3771966808806383730.82.dcm	frameID:	9	timeFrame	1	ImagePositionPatient	-211.485	-204.242	-142.899	ImageOrientationPatient	0.976	0.101	-0.193	0.058	0.732	0.679	PixelSpacing	nan	1.562
+MR.2.16.124.113543.6006.99.3803110619353322051.25.dcm	frameID:	13	timeFrame	1	ImagePositionPatient	-235.737	8.226	180.971	ImageOrientationPatient	0.968	-0.252	-0.006	-0.006	0.003	-1.000	PixelSpacing	nan	1.562
+MR.2.16.124.113543.6006.99.3747075176327839468.97.dcm	frameID:	14	timeFrame	1	ImagePositionPatient	155.609	-218.222	140.568	ImageOrientationPatient	0.236	0.923	-0.303	-0.642	-0.086	-0.762	PixelSpacing	nan	1.562
+MR.2.16.124.113543.6006.99.3747075176327839468.164.dcm	frameID:	16	timeFrame	1	ImagePositionPatient	142.474	-211.481	150.865	ImageOrientationPatient	0.236	0.923	-0.303	-0.642	-0.086	-0.762	PixelSpacing	nan	1.562
+MR.2.16.124.113543.6006.99.3747075176327839468.237.dcm	frameID:	27	timeFrame	1	ImagePositionPatient	129.339	-204.740	161.163	ImageOrientationPatient	0.236	0.923	-0.303	-0.642	-0.086	-0.762	PixelSpacing	nan	1.562
