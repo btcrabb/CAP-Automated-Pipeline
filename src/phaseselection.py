@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+
 import pydicom
 import numpy as np
 import pandas as pd
@@ -40,12 +43,15 @@ class PhaseSelection:
 
     # Class that selects the ES phase from a series of short-axis cardiac images
 
-    def __init__(self, dicom_list, series_list):
+    def __init__(self, 
+                 dst, 
+                 slice_info, 
+                 view):
 
-        self.dicom_list = dicom_list
-        self.series_list = series_list
-        self.series_headers = None
-        self.loaded_dcm_list = None
+        # Instance Variables
+        self.dst = dst  # (str) destination directory to save files to
+        self.slice_info = slice_info    # (DataFrame) Pandas dataframe of slice info file
+        self.view = view    # (str) the cardiac view
         self.model_path = "../models/PhaseSelection/resnet50_lstm.hdf5"
         self.model = None
         self.volume = None
@@ -57,119 +63,108 @@ class PhaseSelection:
 
         self.model = tf.keras.models.load_model(self.model_path)
 
-    def get_series_headers(self):
+    def generate_mapping_dictionary(self):
 
-        # load dicom files for each series in a list of series IDs.
+        # Generates a mapping dictionary to go from slice ID (in slice info file) to ImagePositionPatient
 
-        self.series_headers = []
+        self.mapping_dict = {}
+        for i, row in self.slice_info.iterrows():
+            slice_id = row['Slice ID']
+            location = row['ImagePositionPatient']
+            self.mapping_dict[str(location)] = slice_id
 
-        print("Loading dicom header information...")
-        for dicom_loc in tqdm(self.dicom_list):
-            # read dicom file and return header information and image
-            ds = pydicom.read_file(dicom_loc, force=True)
-            series_instance_uid = ds.get("SeriesInstanceUID", "NA")
+    def preprocess_image(self, img, size, padColor=0, flip=False):
+        
+        # Preprocesses image - enables flipping (to change orientation of image), pads to square and resizes, and converts to uint8
+        
+        # converts image to uint8
+        img = img / np.max(img)
+        img = img*255
+        img = img.astype(np.uint8)
+        
+        # pads and image to square and resizes
+        h, w = img.shape[:2]
+        sh, sw = size
 
-            if series_instance_uid in self.series_list:
-                # get patient, study, and series information
-                patient_id = clean_text(ds.get("PatientID", "NA"))
-                series_instance_uid = ds.get("SeriesInstanceUID", "NA")
-                instance_number = str(ds.get("InstanceNumber", "0"))
-                slice_location = str(ds.get("SliceLocation", "NA"))
-                image_position = str(ds.get("ImagePositionPatient", "NA"))
+        # interpolation method
+        if h > sh or w > sw: # shrinking image
+            interp = cv2.INTER_AREA
+        else: # stretching image
+            interp = cv2.INTER_CUBIC
 
-                # load image data
-                array = ds.pixel_array
+        # aspect ratio of image
+        aspect = w/h 
 
-                self.series_headers.append(
-                    [
-                        patient_id,
-                        dicom_loc,
-                        series_instance_uid,
-                        instance_number,
-                        slice_location,
-                        image_position,
-                        array,
-                    ]
-                )
+        # compute scaling and pad sizing
+        if aspect > 1: # horizontal image
+            new_w = sw
+            new_h = np.round(new_w/aspect).astype(int)
+            pad_vert = (sh-new_h)/2
+            pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
+            pad_left, pad_right = 0, 0
+        elif aspect < 1: # vertical image
+            new_h = sh
+            new_w = np.round(new_h*aspect).astype(int)
+            pad_horz = (sw-new_w)/2
+            pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
+            pad_top, pad_bot = 0, 0
+        else: # square image
+            new_h, new_w = sh, sw
+            pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
 
-    def volume_from_instance_idx(self):
+        # set pad color
+        if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
+            padColor = [padColor]*3
 
-        # Loads a 3D dicom image volume with the phase slice
-        # (or instances if phases are unavailable) defining each volume
+        # scale and pad
+        scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
+        scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
 
-        # save image dimensions, window, and tags from the first image in the list
-        imshape = (224, 224)
-        window_center = self.loaded_dcm_list[0][0x0028, 0x1050].value
-        window_width = self.loaded_dcm_list[0][0x0028, 0x1051].value
+        return scaled_img
 
-        # store slice locations in list
-        slice_locations = [dcm[0x0020, 0x1041].value for dcm in self.loaded_dcm_list]
+    def generate_complete_volume(self):
 
-        # make map to convert slice locations into consecutive integers
-        map_dict = {}
-        for i, loc in enumerate(sorted(list(set(slice_locations)))):
-            map_dict[loc] = i
-            
-        # try to determine phase number
-        try:
-            self.num_phases = int(self.loaded_dcm_list[0][0x2001, 0x1017].value)
-            if self.num_phases < 30:
-                self.num_phases = 30
-        except:
-            pass
+        # Generates a volume to store 3D + time data for each cardiac view (4CH, 3CH, RVOT, SA)
 
-        # create a volume of the appropriate size
-        self.volume = np.zeros(
-            (int(len(set(slice_locations))), self.num_phases, imshape[0], imshape[1], 1),
-            dtype=np.uint16,
-        )
+        # build volume to store data
+        slices = len(self.mapping_dict.keys()) + 2
+        self.volume = np.zeros((slices, self.num_phases, 224, 224, 1), dtype=np.uint16)
 
-        reversed_map = False
+        # find associated dicoms
+        loaded_dcm_dict = {}
+        for (root, subdir, files) in os.walk(os.path.join(self.dst)):
+            for file in files:
+                if '.dcm' in file:
+                    dcm = pydicom.dcmread(os.path.join(root, file), force=True)
+                    location = str(dcm.ImagePositionPatient)
 
-        # iterate through dicoms and assign pixel_array to the appropriate location in the slice
-        for dcm in self.loaded_dcm_list:
-            slice_loc = dcm[0x0020, 0x1041].value
-            slice_idx = map_dict[slice_loc]
-            phase_idx = int(dcm.InstanceNumber - self.num_phases * (slice_idx)) - 1
+                    if location in self.mapping_dict.keys():
+                        if location not in loaded_dcm_dict.keys():
+                            loaded_dcm_dict[location] = [dcm]
+                        else:
+                            loaded_dcm_dict[location].append(dcm)
 
-            if phase_idx > self.num_phases or phase_idx < 0:
-                # will need to reverse the order of slice locations
-                map_dict = {}
-                for i, loc in enumerate(reversed(sorted(list(set(slice_locations))))):
-                    map_dict[loc] = i
+        # iterate through each slice location, ordering images and adding to volume
+        for key in loaded_dcm_dict.keys():
+            slice_id = int(self.mapping_dict[key])
+            instances = [int(dcm.InstanceNumber) for dcm in loaded_dcm_dict[key]]
+            min_instance = np.min(instances)
 
-                reversed_map = True
+            try:
+                for dcm in loaded_dcm_dict[key]:
+                    instance_number = int(dcm.InstanceNumber)
+                    phase_number = instance_number - min_instance
 
-                # reiterate through dcms
-                for dcm in self.loaded_dcm_list:
-                    slice_loc = dcm[0x0020, 0x1041].value
-                    slice_idx = map_dict[slice_loc]
-                    phase_idx = int(dcm.InstanceNumber - 30 * (slice_idx)) - 1
-
-                    img = windowing(
-                        dcm.pixel_array, window_center, window_width
-                    ).astype(np.uint16)
-                    resized = cv2.resize(
-                        img, dsize=(224, 224), interpolation=cv2.INTER_CUBIC
-                    )
-
-                    # insert into volume
-                    self.volume[slice_idx, phase_idx, :, :, 0] = np.copy(resized)
-
-            elif reversed_map == False:
-
-                img = windowing(dcm.pixel_array, window_center, window_width).astype(
-                    np.uint16
-                )
-                resized = cv2.resize(
-                    img, dsize=(224, 224), interpolation=cv2.INTER_CUBIC
-                )
-
-                # insert into volume
-                self.volume[slice_idx, phase_idx, :, :, 0] = np.copy(resized)
-
-            else:
-                break
+                    # add to volume
+                    self.volume[slice_id, phase_number, :, :, 0] = self.preprocess_image(dcm.pixel_array, (224, 224))
+            except:
+                print('Unable to copy pixel array to volume. Likely caused by an incorrect phase number, check that your list of dicoms is correct\n')
+                print('Information: ')
+                print('Phase: ', phase_number)
+                print('Slice number: ', slice_id)
+                
+                print('\nPossible sources of error: \nDuplicate series listed in slice info file (the dicoms are duplicated and stored in two places')
+                print('The number of phases per slice is incorrect, or inconsistent between views')
 
     def generator(self, counter=0, window_size=30):
 
@@ -214,72 +209,45 @@ class PhaseSelection:
 
         # predicts the ES phase for a list of dicoms
 
-        # load series header
-        self.get_series_headers()
+        # convert slice index to slice locations
+        view_df = self.slice_info[self.slice_info['View'] == self.view]
+        sax_slice_ids = view_df['Slice ID']
 
-        # generate intermediate dataframe to store dicom information
-        temp_df = pd.DataFrame(
-            self.series_headers,
-            columns=[
-                "Patient ID",
-                "Filepath",
-                "Series ID",
-                "Instance ID",
-                "Slice Location",
-                "Image Position",
-                "Array",
-            ],
-        )
+        if self.volume is not None:
+            predicted_es = []
 
-        prediction_dictionary = {}
-        for series in temp_df["Series ID"].unique():
-            series_df = temp_df.loc[temp_df["Series ID"] == series]
-
-            files = series_df["Filepath"]
-            self.loaded_dcm_list = []
-            # iterate through files in current list
-            for file in files:
-                # check to ensure file is a valid dcm file
-                try:
-                    dcm = pydicom.dcmread(file)
-                    self.loaded_dcm_list.append(dcm)
-                except IOError:
-                    pass
-
-            # generate volume from individual dicoms
-            self.volume_from_instance_idx()
-
-            if self.volume is not None:
-                predicted_es = []
-
-                slices = self.volume.shape[0]
-                if slices > 7:  # exclude most apical and basal slices if possible
-                    slice_max = self.volume.shape[0] - 2
-                    slice_min = 2
-                else:
-                    slice_max = self.volume.shape[0]
-                    slice_min = 0
+            # exclude most apical and basal slices if possible
+            slices = len(sax_slice_ids)
+            if slices > 7:  
+                slice_max = np.max(sax_slice_ids) - 2
+                slice_min = np.min(sax_slice_ids) + 2
+            else:
+                slice_max = np.max(sax_slice_ids)
+                slice_min = np.min(sax_slice_ids)
 
                 print(
                     "\nMaking ES phase predictions for each slice in the short-axis stack..."
                 )
-                for j in tqdm(range(slice_min, slice_max)):
-                    predictions = np.zeros((5, 30))
-                    images = next(
-                        self.generator(counter=j)
-                    )  # for each volume, generate the corresponding input
 
-                    for i, img in enumerate(images):
-                        predictions_raw = self.model.predict_on_batch(
-                            tf.expand_dims(img, 0)
-                        )
-                        predictions[i, :] = np.roll(
-                            tf.squeeze(predictions_raw), -i * 2, 0
-                        )
+            # iterate through selected slices
+            for j in tqdm(range(slice_min, slice_max)):
+                predictions = np.zeros((5, 30))
+                images = next(
+                    self.generator(counter=j)
+                )  # for each volume, generate the corresponding input
 
-                    predicted_es.append(np.ceil(np.argmax(np.mean(predictions, axis=0))))
+                # predict on batch for each generated input
+                for i, img in enumerate(images):
+                    predictions_raw = self.model.predict_on_batch(
+                        tf.expand_dims(img, 0)
+                    )
+                    predictions[i, :] = np.roll(
+                        tf.squeeze(predictions_raw), -i * 2, 0
+                    )
 
-            # append to prediction dictionary
-            prediction_dictionary[series] = int(np.ceil(np.median(predicted_es)))
+                predicted_es.append(np.ceil(np.argmax(np.mean(predictions, axis=0))))
 
-        return prediction_dictionary
+            # average predictions to find es phase
+            es_phase = int(np.ceil(np.median(predicted_es)))
+
+        return es_phase
