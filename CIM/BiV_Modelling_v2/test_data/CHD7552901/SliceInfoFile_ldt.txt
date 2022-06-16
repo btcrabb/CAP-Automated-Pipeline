@@ -1,0 +1,9 @@
+CAP_CHD7552901_MR_FB_SA__hrt_raw_20170718151858943_61.dcm	frameID:	0	timeFrame	1	ImagePositionPatient	85.495	-196.619	99.592	ImageOrientationPatient	0.201	0.975	-0.091	-0.286	-0.030	-0.958	PixelSpacing	1.406	1.406
+CAP_CHD7552901_MR_FB_SA__hrt_raw_20170718151900834_121.dcm	frameID:	1	timeFrame	1	ImagePositionPatient	66.759	-192.248	105.056	ImageOrientationPatient	0.201	0.975	-0.091	-0.286	-0.030	-0.958	PixelSpacing	1.406	1.406
+CAP_CHD7552901_MR_FB_SA__hrt_raw_20170718151902631_181.dcm	frameID:	2	timeFrame	1	ImagePositionPatient	48.023	-187.877	110.519	ImageOrientationPatient	0.201	0.975	-0.091	-0.286	-0.030	-0.958	PixelSpacing	1.406	1.406
+CAP_CHD7552901_MR_FB_SA__hrt_raw_20170718151904584_241.dcm	frameID:	3	timeFrame	1	ImagePositionPatient	29.287	-183.506	115.982	ImageOrientationPatient	0.201	0.975	-0.091	-0.286	-0.030	-0.958	PixelSpacing	1.406	1.406
+CAP_CHD7552901_MR_LT_2ch_hrt_raw_20170718151919350_1.dcm	frameID:	4	timeFrame	1	ImagePositionPatient	-134.383	62.437	115.708	ImageOrientationPatient	0.946	-0.319	-0.064	-0.061	0.021	-0.998	PixelSpacing	1.328	1.328
+CAP_CHD7552901_MR_4ch__hrt_raw_20170718151849599_61.dcm	frameID:	5	timeFrame	1	ImagePositionPatient	-56.730	-195.645	-232.325	ImageOrientationPatient	0.891	0.354	0.285	-0.452	0.626	0.636	PixelSpacing	1.406	1.406
+CAP_CHD7552901_MR_RT_2ch_hrt_raw_20170718151936022_1.dcm	frameID:	6	timeFrame	1	ImagePositionPatient	-162.558	-47.748	134.074	ImageOrientationPatient	0.991	-0.132	-0.000	0.028	0.212	-0.977	PixelSpacing	1.484	1.484
+CAP_CHD7552901_MR_RVOT_2_hrt_raw_20170718151939319_1.dcm	frameID:	7	timeFrame	1	ImagePositionPatient	-96.130	-50.607	223.024	ImageOrientationPatient	0.312	0.835	-0.453	0.331	-0.543	-0.772	PixelSpacing	1.328	1.328
+CAP_CHD7552901_MR_FB_LVOT__hrt_raw_20170718151854412_1.dcm	frameID:	8	timeFrame	1	ImagePositionPatient	-85.729	-102.854	151.266	ImageOrientationPatient	0.813	-0.198	-0.547	-0.195	0.793	-0.577	PixelSpacing	1.328	1.328
