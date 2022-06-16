@@ -9,7 +9,18 @@ __pycache__/
 
 # Distribution / packaging
 bin/
-data/
+data/processed/*
+data/raw/Longitudinal Raw MRI/*
+data/raw/Longitudinal Cases/*
+data/raw/LongitudinalGPT/*
+data/final/*
+data/segmentations/*
+data/output/*
+!data/raw/Longitudinal Raw MRI/CHD1055301
+!data/processed/CHD1055301
+!data/final/CHD1055301
+!data/segmentations/CHD1053301
+!data/output/CHD1053301
 models/
 build/
 develop-eggs/
