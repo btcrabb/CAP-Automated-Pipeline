@@ -28,6 +28,8 @@ Project Organization
     │
     ├── nnUNet                    <- Local installation of nnUNet (altered to support windows)
     │
+    ├── CIM                       <- CIM BiV Modelling v2 code for model fitting
+    │
     ├── src                       <- Source code for each step / module
     │   ├── viewselection.py
     │   ├── phaseselection.py  
