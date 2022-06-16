@@ -16,9 +16,9 @@ FRAME #1
      Iteration #13 Weight 640000.0	 ICF error 1.4353701024400403
      Iteration #14 Weight 400000.0	 ICF error 1.4353701024400403
 End of the implicitly constrained fit 
---- 12.684008836746216 seconds ---
+--- 11.163056373596191 seconds ---
      Iteration #1 Smoothing weight 1000000.0	 ECF error 1.4353701024400403
      Iteration #2 Smoothing weight 1000000.0	 ECF error 1.3588910914468584
      Iteration #3 Smoothing weight 1000000.0	 ECF error 1.3583519053187807
 End of the implicitly constrained fit 
---- 23.762194395065308 seconds ---
+--- 27.61112666130066 seconds ---

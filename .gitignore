@@ -9,6 +9,11 @@ __pycache__/
 
 # Distribution / packaging
 bin/
+CIM/BiV_Modelling_v2/test_data_automated/*
+CIM/BiV_Modelling_v2/test_data_manual/*
+CIM/BiV_Modelling_v2/results_automated/*
+CIM/BiV_Modelling_v2/results_manual/*
+CIM/BiV_Modelling_v2/*.zip
 data/processed/*
 data/raw/Longitudinal Raw MRI/*
 data/raw/Longitudinal Cases/*
