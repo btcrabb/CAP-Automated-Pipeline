@@ -612,10 +612,6 @@ class GuidePointProcessing():
         min_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == min_slice_loc]['Slice ID'])
         max_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == max_slice_loc]['Slice ID'])
 
-        print(min_sax_slice_id)
-        print(max_sax_slice_id)
-
-
         for i, row in self.landmarks_df.iterrows():
             slice_id = row['Slice ID']
             view = row['View']

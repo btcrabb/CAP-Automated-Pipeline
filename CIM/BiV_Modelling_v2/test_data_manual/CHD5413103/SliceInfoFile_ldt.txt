@@ -1,0 +1,12 @@
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185508692_331.dcm	frameID:	0	timeFrame	1	ImagePositionPatient	116.116	-130.749	165.684	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185438395_391.dcm	frameID:	1	timeFrame	1	ImagePositionPatient	104.328	-125.819	175.315	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185500364_451.dcm	frameID:	2	timeFrame	1	ImagePositionPatient	92.541	-120.890	184.946	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185418208_100.dcm	frameID:	3	timeFrame	1	ImagePositionPatient	163.266	-150.467	127.161	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185446114_151.dcm	frameID:	4	timeFrame	1	ImagePositionPatient	151.479	-145.537	136.792	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185435333_211.dcm	frameID:	5	timeFrame	1	ImagePositionPatient	139.691	-140.608	146.422	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_SA_hrt_raw_20190207185442927_271.dcm	frameID:	6	timeFrame	1	ImagePositionPatient	127.904	-135.678	156.053	ImageOrientationPatient	0.137	0.940	-0.313	-0.662	-0.148	-0.735	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_4ch__hrt_raw_20190207185450989_31.dcm	frameID:	7	timeFrame	1	ImagePositionPatient	-169.466	42.977	90.129	ImageOrientationPatient	0.889	0.406	0.210	0.413	-0.516	-0.750	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_RVOT_hrt_raw_20190207185342879_1.dcm	frameID:	8	timeFrame	1	ImagePositionPatient	48.601	-167.886	194.151	ImageOrientationPatient	-0.099	0.990	0.100	-0.010	0.099	-0.995	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_LT_2ch_hrt_raw_20190207185410879_1.dcm	frameID:	9	timeFrame	1	ImagePositionPatient	-118.626	113.856	91.215	ImageOrientationPatient	0.844	-0.528	0.088	0.075	-0.047	-0.996	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_RT_2ch_hrt_raw_20190207185414020_1.dcm	frameID:	10	timeFrame	1	ImagePositionPatient	-144.243	73.199	126.680	ImageOrientationPatient	0.870	-0.493	0.000	0.032	0.057	-0.998	PixelSpacing	1.250	1.250
+CAP_CHD5413103_MR_LVOT_hrt_raw_20190207185502114_1.dcm	frameID:	11	timeFrame	1	ImagePositionPatient	-71.069	-149.083	97.970	ImageOrientationPatient	0.796	0.106	-0.596	-0.166	0.985	-0.048	PixelSpacing	1.172	1.172

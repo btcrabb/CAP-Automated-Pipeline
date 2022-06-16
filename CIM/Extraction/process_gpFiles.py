@@ -41,8 +41,8 @@ def CleanGPFile(folder, **kwargs):
     frames = ['ES', 'ED']
 
     for frame in frames:
-        contour_file = os.path.join(folder, 'GP_'+frame+'_ldt.txt') 
-        metadata_file = os.path.join(folder,'SliceInfoFile.txt')
+        contour_file = os.path.join(folder, 'GP_'+frame+'.txt') 
+        metadata_file = os.path.join(folder,'SliceInfo.txt')
         
         time_frames = [1]   #ED and ES frames for this example case, taken from SciReport
 

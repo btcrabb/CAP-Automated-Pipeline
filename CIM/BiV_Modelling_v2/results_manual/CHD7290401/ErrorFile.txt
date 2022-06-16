@@ -1,0 +1,24 @@
+Log for patient: CHD7290401
+
+FRAME #1
+     Iteration #1 Weight 1000000000000.0	 ICF error 3.049680938609469
+     Iteration #2 Weight 200000000000.0	 ICF error 3.233775530590986
+     Iteration #3 Weight 40000000000.0	 ICF error 2.6385493352202527
+     Iteration #4 Weight 8000000000.0	 ICF error 2.47084128576271
+     Iteration #5 Weight 1600000000.0	 ICF error 2.4358309138039256
+     Iteration #6 Weight 320000000.0	 ICF error 2.397045788912393
+     Iteration #7 Weight 64000000.0	 ICF error 2.337900815454397
+     Iteration #8 Weight 12800000.0	 ICF error 2.200511119837841
+     Iteration #9 Weight 2560000.0	 ICF error 1.958243008681849
+     Iteration #10 Weight 512000.0	 ICF error 1.683622706375522
+     Iteration #11 Weight 102400.0	 ICF error 1.422696938055569
+     Iteration #12 Weight 256000.0	 ICF error 1.422696938055569
+     Iteration #13 Weight 102400.0	 ICF error 1.2993126455978836
+     Iteration #14 Weight 128000.0	 ICF error 1.2993126455978836
+     Iteration #15 Weight 80000.0	 ICF error 1.2993126455978836
+End of the implicitly constrained fit 
+--- 10.840676546096802 seconds ---
+     Iteration #1 Smoothing weight 1000000.0	 ECF error 1.2993126455978836
+     Iteration #2 Smoothing weight 1000000.0	 ECF error 1.2726927387873932
+End of the implicitly constrained fit 
+--- 15.878388166427612 seconds ---
