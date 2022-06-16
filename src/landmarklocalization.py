@@ -160,6 +160,7 @@ class LandmarkLocalization:
         self.inputs = None
         self.num_phases = 30
         self.flip_ud = False
+        self.flip_lr = False
         self.test_time_augmentations = True
         self.number_of_test_augmentations = 20
         self.normalize_predictions = True
@@ -197,17 +198,29 @@ class LandmarkLocalization:
             location = row['ImagePositionPatient']
             self.mapping_dict[str(location)] = slice_id
 
-    def preprocess_image(self, img, size, padColor=0, flip=False):
+    def preprocess_image(self, img, size, window_center, window_width, padColor=0, flip=False):
         
         # Preprocesses image - enables flipping (to change orientation of image), pads to square and resizes, and converts to uint8
         
-        # converts image to uint8
+        # Clip an array to the appropriate range given a window width and level
+        # calculate min and max pixel values
+        min_value = window_center - window_width / 2
+        max_value = window_center + window_width / 2
+
+        # clip values to appropriate window
+        img = np.clip(img, min_value, max_value)
+
+        # normalizes and converts image to uint8
         img = img / np.max(img)
         img = img*255
         img = img.astype(np.uint8)
         
+        # flip left-right and up-down if necessary
         if self.flip_ud == True:
             img = np.flipud(img)
+
+        if self.flip_lr == True:
+            img = np.fliplr(img)
 
         # pads and image to square and resizes
         h, w = img.shape[:2]
@@ -282,8 +295,11 @@ class LandmarkLocalization:
                     instance_number = int(dcm.InstanceNumber)
                     phase_number = instance_number - min_instance
 
+                    window_center = dcm[0x0028, 0x1050].value
+                    window_width = dcm[0x0028, 0x1051].value
+
                     # add to volume
-                    self.volume[slice_id, phase_number, :, :, 0] = self.preprocess_image(dcm.pixel_array, (256, 256))
+                    self.volume[slice_id, phase_number, :, :, 0] = self.preprocess_image(dcm.pixel_array, (256, 256), window_center, window_width)
             except:
                 print('Unable to copy pixel array to volume. Likely caused by an incorrect phase number, check that your list of dicoms is correct\n')
                 print('Information: ')
@@ -356,6 +372,9 @@ class LandmarkLocalization:
                         
                         if self.flip_ud == True:
                             self.heatmap_predictions['outputs'] =  np.flip(self.heatmap_predictions['outputs'],axis=1)
+
+                        if self.flip_lr == True:
+                            self.heatmap_predictions['outputs'] =  np.flip(self.heatmap_predictions['outputs'],axis=2)
                             
                         # mask borders of predictions
                         self.heatmap_predictions['outputs'][:, :10, :10, :] = 0
@@ -420,6 +439,8 @@ class LandmarkLocalization:
                     
                     if self.flip_ud == True:
                         self.heatmap_predictions['outputs'] =  np.flip(self.heatmap_predictions['outputs'],axis=1)
+                    if self.flip_lr == True:
+                        self.heatmap_predictions['outputs'] =  np.flip(self.heatmap_predictions['outputs'],axis=2)
                         
                     # mask borders of predictions
                     self.heatmap_predictions['outputs'][:, :10, :10, :] = 0
