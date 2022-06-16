@@ -20,7 +20,7 @@ data/output/*
 !data/processed/CHD1055301
 !data/final/CHD1055301
 !data/segmentations/CHD1053301
-!data/output/CHD1053301
+!data/segmentations/CHD1053301/SA/SA_12_0.nii.gz
 models/
 build/
 develop-eggs/
