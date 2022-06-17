@@ -29,7 +29,8 @@ contours_to_plot = [ContourType.LAX_RA, ContourType.LAX_RV_ENDOCARDIAL,
                     ContourType.LAX_LV_ENDOCARDIAL, ContourType.LAX_LV_EPICARDIAL,
                     ContourType.LAX_RV_EPICARDIAL, ContourType.SAX_RV_OUTLET,
                     ContourType.AORTA_PHANTOM, ContourType.TRICUSPID_PHANTOM,
-                    ContourType.MITRAL_PHANTOM, ContourType.PULMONARY_PHANTOM
+                    ContourType.MITRAL_PHANTOM, ContourType.PULMONARY_PHANTOM,
+                    ContourType.LAX_EPICARDIAL, ContourType.SAX_EPICARDIAL
                     ]
 
 def perform_fitting(folder, **kwargs):

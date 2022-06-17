@@ -15,13 +15,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from . import visualization as viewer
 
-SAMPLED_CONTOUR_TYPES = [ContourType.LAX_LV_ENDOCARDIAL,
+SAMPLED_CONTOUR_TYPES = [ContourType.LAX_EPICARDIAL,
+                         ContourType.SAX_EPICARDIAL,
+                         ContourType.LAX_LV_ENDOCARDIAL,
                          ContourType.LAX_LV_EPICARDIAL,
                          ContourType.SAX_LV_ENDOCARDIAL,
                          ContourType.SAX_LV_EPICARDIAL,
                          ContourType.LAX_LA,
                          ContourType.SAX_RV_ENDOCARDIAL,
                          ContourType.LAX_RV_ENDOCARDIAL,
+                         ContourType.LAX_RV_EPICARDIAL,
                          ContourType.SAX_RV_EPICARDIAL,
                          ContourType.SAX_RV_EPICARDIAL,
                          ContourType.SAX_RV_FREEWALL,
@@ -262,7 +265,9 @@ class GPDataSet(object):
                           ContourType.SAX_RV_OUTLET,
                           ContourType.LAX_RV_FREEWALL]
         epi_contours = [ContourType.SAX_RV_EPICARDIAL,
-                        ContourType.LAX_RV_EPICARDIAL]
+                        ContourType.LAX_RV_EPICARDIAL,
+                        ContourType.LAX_EPICARDIAL,
+                        ContourType.SAX_EPICARDIAL]
 
         for i in np.unique(self.slice_number):
 
@@ -612,6 +617,8 @@ class GPDataSet(object):
                                   ContourType.LAX_LA,
                                   ContourType.SAX_LV_EPICARDIAL,
                                   ContourType.LAX_LV_EPICARDIAL,
+                                  ContourType.SAX_EPICARDIAL,
+                                  ContourType.LAX_EPICARDIAL,
                                   ContourType.SAX_LV_ENDOCARDIAL,
                                   ContourType.LAX_LV_ENDOCARDIAL,
                                   ])
@@ -622,6 +629,7 @@ class GPDataSet(object):
                                     "rgb(0,0,205)", "rgb(65,105,225)",
                                     "rgb(0,206,209)","rgb(95,158,160)",
                                     "rgb(128,0,0)", "rgb(205,92,92)",
+                                    "rgb(220,20,60)","rgb(255,127,80)",
                                     "rgb(220,20,60)","rgb(255,127,80)",
                                     "rgb(85,107,47)","rgb(50,205,50)"])
         # points types
