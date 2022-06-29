@@ -299,7 +299,8 @@ class GuidePointProcessing():
                     RV_epi_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_myo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_myo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_myo_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_myo_pts = []
 
@@ -394,7 +395,8 @@ class GuidePointProcessing():
                     RV_epi_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_myo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_myo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_myo_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_myo_pts = []
 
@@ -611,6 +613,10 @@ class GuidePointProcessing():
 
         min_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == min_slice_loc]['Slice ID'])
         max_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == max_slice_loc]['Slice ID'])
+
+        print(min_sax_slice_id)
+        print(max_sax_slice_id)
+
 
         for i, row in self.landmarks_df.iterrows():
             slice_id = row['Slice ID']
