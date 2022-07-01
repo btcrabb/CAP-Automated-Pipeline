@@ -8,6 +8,7 @@ from multiprocessing import Pool
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import cv2
 
 
 def clean_text(string):
@@ -16,14 +17,52 @@ def clean_text(string):
 
     forbidden_symbols = ["*", ".", ",", "\"", "\\", "/", "|", "[", "]", ":", ";", " "]
     for symbol in forbidden_symbols:
-        string = string.replace(symbol, "_")  # replace everything with an underscore
+        string = string.replace(symbol, "")  # replace all bad symbols
 
     return string.lower()
 
 
-def preprocess(img):
+def preprocess(img, size=(224,224), padColor=0, flip=False):
 
     # format image into tensor, standardized to 0-255
+    
+    # pads and image to square and resizes
+    h, w = img.shape[:2]
+    sh, sw = size
+
+    # interpolation method
+    if h > sh or w > sw: # shrinking image
+        interp = cv2.INTER_AREA
+    else: # stretching image
+        interp = cv2.INTER_CUBIC
+
+    # aspect ratio of image
+    aspect = w/h 
+
+    # compute scaling and pad sizing
+    if aspect > 1: # horizontal image
+        new_w = sw
+        new_h = np.round(new_w/aspect).astype(int)
+        pad_vert = (sh-new_h)/2
+        pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
+        pad_left, pad_right = 0, 0
+    elif aspect < 1: # vertical image
+        new_h = sh
+        new_w = np.round(new_h*aspect).astype(int)
+        pad_horz = (sw-new_w)/2
+        pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
+        pad_top, pad_bot = 0, 0
+    else: # square image
+        new_h, new_w = sh, sw
+        pad_left, pad_right, pad_top, pad_bot = 0, 0, 0, 0
+
+    # set pad color
+    if len(img.shape) is 3 and not isinstance(padColor, (list, tuple, np.ndarray)): # color image but only one color provided
+        padColor = [padColor]*3
+
+    # scale and pad
+    scaled_img = cv2.resize(img, (new_w, new_h), interpolation=interp)
+    scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
 
     img = tf.cast(img, tf.float32)
     img = tf.image.resize(tf.expand_dims(img, 2), (224, 224))
@@ -73,15 +112,15 @@ class ViewSelection:
 
         if self.model_name == 'ResNet50':
             self.model = tf.keras.models.load_model(os.path.join(model_path, 'ViewSelection/resnet50.hdf5'))
-            # print(model.summary())
+            # print(self.model.summary())
 
         elif self.model_name == 'VGG19':
             self.model = tf.keras.models.load_model(os.path.join(model_path, 'ViewSelection/vgg19.hdf5'))
-            # print(model.summary())
+            # print(self.model.summary())
 
         elif self.model_name == 'Xception':
             self.model = tf.keras.models.load_model(os.path.join(model_path, 'ViewSelection/xception.hdf5'))
-            # print(model.summary())
+            # print(self.model.summary())
 
         else:
             print('Unknown model specified in parameters!')
@@ -187,7 +226,7 @@ class ViewSelection:
             prediction= u[count_sort_ind][0]
             conf = np.round(np.max(count) / np.sum(count), 2)
 
-            output_series.append([patient_id.upper(), series, series_num, frames, frames_per_slice, series_desc, prediction, conf])
+            output_series.append([patient_id, series, series_num, frames, frames_per_slice, series_desc, prediction, conf])
 
         output_series_df = pd.DataFrame(output_series, columns=['Patient ID',
                                                                 'Series ID',
@@ -209,7 +248,7 @@ class ViewSelection:
                 new = df[df['Series ID'] == series]
                 series_df = output_series_df[output_series_df['Series ID'] == series]
                 predicted_view = series_df['Predicted View'].values[0]
-                patient_id = series_df['Patient ID'].values[0].upper()
+                patient_id = series_df['Patient ID'].values[0]
 
                 if self.save_only_desired:
                     if predicted_view in self.desired_series and \
@@ -231,9 +270,8 @@ class ViewSelection:
                         pass
                 else:
                     for i, row in new.iterrows():
-                        file_name = row['Modality'] + '.' + \
-                                    row['Series ID'] + '.' + row['Instance Number'] + '.dcm'
-                        patient_id = row['Patient ID'].upper()
+                        file_name = os.path.basename(row['Filename'])
+                        patient_id = row['Patient ID']
                         dicom = pydicom.dcmread(row['Filename'])
 
                         # save files to a 2-tier nested folder structure
