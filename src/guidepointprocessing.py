@@ -29,6 +29,30 @@ def inverse_coordinate_transformation(coordinate, imagePositionPatient, imageOri
 
     """ Performs a coordinate transformation from image coordinates to patient coordinates """
 
+    # correct coordinate position if image was padded originally
+    # pads and image to square and resizes
+    h, w = size
+    sh, sw = [256, 256]
+
+    # aspect ratio of image
+    aspect = w/h 
+
+    # compute scaling and pad sizing
+    if aspect > 1: # horizontal image
+        new_w = sw
+        new_h = np.round(new_w/aspect).astype(int)
+        pad_vert = (sh-new_h)/2
+        pad_top, pad_bot = np.floor(pad_vert).astype(int), np.ceil(pad_vert).astype(int)
+        pad_left, pad_right = 0, 0
+    elif aspect < 1: # vertical image
+        new_h = sh
+        new_w = np.round(new_h*aspect).astype(int)
+        pad_horz = (sw-new_w)/2
+        pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
+        pad_top, pad_bot = 0, 0
+
+    fixed_coordinate = [coordinate[0] - pad_top, coordinate[1] - pad_left]
+
     # image position and orientation
     S = imagePositionPatient
     X = imageOrientationPatient[:3]
@@ -40,11 +64,11 @@ def inverse_coordinate_transformation(coordinate, imagePositionPatient, imageOri
                 [X[2]*ps[0], Y[2]*ps[1], 0, S[2]],
                 [0, 0, 0, 1]])
 
-    ratio_x = size[0] / 256
-    ratio_y = size[1] / 256
+    ratio_x = np.max(size) / 256
+    ratio_y = np.max(size) / 256
     
     # expand dimensions of coordinate
-    pos = [float(x) for x in coordinate[0:3]]
+    pos = [float(x) for x in fixed_coordinate[0:3]]
     coord = np.array([pos[1]*ratio_x, pos[0]*ratio_y, 0, 1.0])
     
     # perform transformation and return as list
@@ -625,10 +649,6 @@ class GuidePointProcessing():
 
         min_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == min_slice_loc]['Slice ID'])
         max_sax_slice_id = int(sax_slice_info[sax_slice_info['Slice Location'] == max_slice_loc]['Slice ID'])
-
-        print(min_sax_slice_id)
-        print(max_sax_slice_id)
-
 
         for i, row in self.landmarks_df.iterrows():
             slice_id = row['Slice ID']
