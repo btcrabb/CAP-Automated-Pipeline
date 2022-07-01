@@ -50,6 +50,9 @@ def inverse_coordinate_transformation(coordinate, imagePositionPatient, imageOri
         pad_horz = (sw-new_w)/2
         pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
         pad_top, pad_bot = 0, 0
+    else:
+        pad_top, pad_bot = 0,0
+        pad_left, pad_right = 0,0
 
     fixed_coordinate = [coordinate[0] - pad_top, coordinate[1] - pad_left]
 
