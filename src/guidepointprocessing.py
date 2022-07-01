@@ -289,12 +289,14 @@ class GuidePointProcessing():
                 # convert to contours
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_endo_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_epi_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_myo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -385,12 +387,14 @@ class GuidePointProcessing():
                 # convert to contours
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_endo_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_epi_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_myo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -466,18 +470,26 @@ class GuidePointProcessing():
                 RV_epi = (RV_endo | RV_myo).astype(np.uint8)
 
                 # convert to contours
+                # left ventricle
                 contours, hierarchy = cv2.findContours(cv2.inRange(LV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-                LV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)  
+                c = max(contours, key = cv2.contourArea)
+                LV_endo_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64)  
+
                 contours, hierarchy = cv2.findContours(cv2.inRange(LV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-                LV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                c = max(contours, key = cv2.contourArea)
+                LV_epi_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+
+                # right ventricle
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_endo_pts = []
                 contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
                 if len(contours) > 0:
-                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                    c = max(contours, key = cv2.contourArea)
+                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(c[:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
                 else:
                     RV_epi_pts = []
 

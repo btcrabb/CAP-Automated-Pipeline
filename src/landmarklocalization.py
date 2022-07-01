@@ -450,8 +450,8 @@ class LandmarkLocalization:
                     self.point_predictions = [slice_id, self.view, prediction_phase]
                     for i in range(self.heatmap_predictions['outputs'].shape[-1]):
 
-                        landmark = np.where(self.heatmap_predictions['outputs'][0, :, :, i] ==
-                                  np.max(self.heatmap_predictions['outputs'][0, :, :, i]))
+                        landmark = [x[0] for x in np.where(self.heatmap_predictions['outputs'][0, :, :, i] ==
+                                  np.max(self.heatmap_predictions['outputs'][0, :, :, i]))]
                         
                         if landmark[0] == 0 or landmark[0] == 255:
                             self.point_predictions.append(None)
