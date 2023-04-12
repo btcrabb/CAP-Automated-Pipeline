@@ -230,7 +230,7 @@ if __name__ == '__main__':
     #pid = os.getpid()
     #os.system("taskset -cp %d %d" %(66, pid))
 
-    main_path = 'E:/CAP/CAP-FullAutomation/CIM/BiV_Modelling_v2/'          ### folder in use
+    main_path = '.'          ### folder in use
 
     cases_folder = os.path.join(main_path, 'test_data')
     cases_list = [os.path.join(cases_folder, batch) for batch in os.listdir(cases_folder)]

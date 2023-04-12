@@ -1,11 +1,13 @@
-Towards fully automated cardiac statistical modeling
+Fully automated cardiac shape modeling in tetralogy of Fallot
 ==============================
-
-Fully-automated, deep-learning based pipeline to generate biventricular cardiac models from raw cine SSFP MRI images.
 
 Author: Brendan Crabb
 
 Email: brendan.crabb@hsc.utah.edu
+
+Fully-automated, deep-learning based pipeline to generate biventricular cardiac models from raw cine SSFP MRI images. If you use this repository in your research, please cite the following publication:
+
+Govil, S., Crabb, B. T., Deng, Y., Dal Toso, L., Puyol-Antón, E., Pushparajah, K., ... & McCulloch, A. D. (2023). A deep learning approach for fully automated cardiac shape modeling in tetralogy of Fallot. Journal of Cardiovascular Magnetic Resonance, 25(1), 15.
 
 
 Project Organization
@@ -44,7 +46,11 @@ Project Organization
 
 ### 1.0 Conda Environment
 
+<<<<<<< Updated upstream
 To ensure a working python environment, I recommend creating a new conda environment from the appropriate provided environment.yml file. To do so, enter the following commands into the terminal: 
+=======
+To ensure a working python environment, I recommend creating a new conda environment from the provided environment.yml file. Conda environment files are provided for both windows and ubuntu, please select the appropriate file for your OS. To create the environment, enter the following commands into the terminal: 
+>>>>>>> Stashed changes
 
 ```
 > conda env create -f environment_windows.yml
@@ -73,4 +79,19 @@ In the models folder, each step in the end-to-end pipeline has its own subfolder
 
 ### 3.0 End-to-end Pipeline
 
-Once you have a working python environment, and the trained models have been downloaded, you can run the end-to-end pipeline using the provided jupyter notebook, 1.1-BTC-FullAutoCAP.ipynb.
+Once you have a working python environment, and the trained models have been downloaded, you can run the end-to-end pipeline using the provided jupyter notebook, 1.1-BTC-FullAutoCAP.ipynb. This notebook performs view classification, phase selection, SAX slice selection, landmark localization, segmentation, and guidepoint extraction. 
+
+### 4.0 Mesh Fitting
+
+The guidepoint files from the previous step will be copied over into the CIM/BiV_Modelling_v2/test_data/ folder. The provided code performs patient-specific biventricular mesh customization. 
+
+Documentation: https://github.kcl.ac.uk/pages/YoungLab/BiV_Modelling/
+
+How to use:
+
+- before running: set parameters in config_parameters.py
+- run Extraction/process_gpFiles to clean LAX contours
+- perform_fit.py: performs the biventricular fitting. Prior to use, make sure to set the "main_path" variable within the script. 
+
+For more details, please see the provide readme files in the CIM subfolder. 
+
