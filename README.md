@@ -48,11 +48,7 @@ Project Organization
 
 ### 1.0 Conda Environment
 
-<<<<<<< Updated upstream
-To ensure a working python environment, I recommend creating a new conda environment from the appropriate provided environment.yml file. To do so, enter the following commands into the terminal: 
-=======
 To ensure a working python environment, I recommend creating a new conda environment from the provided environment.yml file. Conda environment files are provided for both windows and ubuntu, please select the appropriate file for your OS. To create the environment, enter the following commands into the terminal: 
->>>>>>> Stashed changes
 
 ```
 > conda env create -f environment_windows.yml
