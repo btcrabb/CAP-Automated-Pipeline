@@ -44,13 +44,13 @@ Project Organization
 
 ### 1.0 Conda Environment
 
-To ensure a working python environment, I recommend creating a new conda environment from the provided environment.yml file. To do so, enter the following commands into the terminal: 
+To ensure a working python environment, I recommend creating a new conda environment from the appropriate provided environment.yml file. To do so, enter the following commands into the terminal: 
 
 ```
-> conda env create -f environment.yml
+> conda env create -f environment_windows.yml
 ```
     
-The conda environment will be named "CAP". Activate it by running:
+The conda environment will be named "CAP". If you are using an Ubuntu OS, use the environment_ubuntu.yml file. Activate it by running:
 
 ```
 > conda activate CAP
