@@ -35,7 +35,9 @@ Project Organization
     ├── src                       <- Source code for each step / module
     │   ├── viewselection.py
     │   ├── phaseselection.py  
-    │   ├── landmarklocalization.py 
+    │   ├── landmarklocalization.py
+    |   ├── annotations.py
+    |   ├── utils.py
     │   └── guidepointprocessing.py     
     │
     ├── reports                   <- Generated analysis, saved .csv with view predictions for each series
