@@ -71,7 +71,7 @@ Next, it is necessary to install the local version of nnUNet. To do so, I sugges
 
 Download the trained models for each step from the following linK:
 
-[https://uofu.box.com/s/wlhvxcyx09wliz9oadpt763ggq9h0rua](https://drive.google.com/file/d/1W74t0TUM20KUIQSWfjXnBIYwrMbtyGUi/view?usp=sharing)
+https://drive.google.com/file/d/1W74t0TUM20KUIQSWfjXnBIYwrMbtyGUi/view?usp=sharing
 
 In the models folder, each step in the end-to-end pipeline has its own subfolder with the trained model. New models can be added to these folders and called from the corresponding Jupyter notebook if desired. 
 
