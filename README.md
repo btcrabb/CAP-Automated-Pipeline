@@ -9,6 +9,8 @@ Fully-automated, deep-learning based pipeline to generate biventricular cardiac 
 
 Govil, S., Crabb, B. T., Deng, Y., Dal Toso, L., Puyol-Antón, E., Pushparajah, K., ... & McCulloch, A. D. (2023). A deep learning approach for fully automated cardiac shape modeling in tetralogy of Fallot. Journal of Cardiovascular Magnetic Resonance, 25(1), 15.
 
+Article Link: https://link.springer.com/article/10.1186/s12968-023-00924-1
+
 
 Project Organization
 ------------
