@@ -191,96 +191,104 @@ class GuidePointProcessing():
             ps = _slice_info['Pixel Spacing'].values[0]
             size = _slice_info['Size'].values[0]
 
-            # extract points
-            LV_endo = (segmentation == 1).astype(np.uint8)
-            LV_myo = (segmentation == 2).astype(np.uint8)
-            LV_epi = (LV_endo | LV_myo).astype(np.uint8)
-            RV_endo = (segmentation == 3).astype(np.uint8)
-            RV_myo = (segmentation == 4).astype(np.uint8)
-            RV_epi = (RV_endo | RV_myo).astype(np.uint8)
+            # check if slice_id is a slice/view that should be included in the final model
+            if int(slice_id) in [int(x) for x in self.landmarks_df['Slice ID']]:
 
-            # convert to contours
-            contours, hierarchy = cv2.findContours(cv2.inRange(LV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            if len(contours) > 0:
-                LV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                # extract points
+                LV_endo = (segmentation == 1).astype(np.uint8)
+                LV_myo = (segmentation == 2).astype(np.uint8)
+                LV_epi = (LV_endo | LV_myo).astype(np.uint8)
+                RV_endo = (segmentation == 3).astype(np.uint8)
+                RV_myo = (segmentation == 4).astype(np.uint8)
+                RV_epi = (RV_endo | RV_myo).astype(np.uint8)
+
+                # convert to contours
+                contours, hierarchy = cv2.findContours(cv2.inRange(LV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    LV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                else:
+                    LV_endo_pts = []
+                contours, hierarchy = cv2.findContours(cv2.inRange(LV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    LV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
+                else:
+                    LV_epi_pts = []
+                contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)
+                else:
+                    RV_endo_pts = []
+                contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                if len(contours) > 0:
+                    RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)
+                else:
+                    RV_epi_pts = []
+
+                # Get intersection points between RV endo and LV epi
+                if len(RV_endo_pts)>0 and len(LV_epi_pts)>0:
+                    pairs = self.get_intersections(RV_endo_pts, LV_epi_pts, distance_cutoff=4.5)
+
+                    if len(pairs) > 0:
+                        RV_septal_pts = RV_endo_pts[np.unique(pairs[:,0])] # deletes intersection from RV endo pts
+                        RV_endo_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_endo_pts) if i not in np.unique(pairs[:,0])], 
+                                              dtype=np.int64)
+                else:
+                    RV_septal_pts = []
+
+                # Get intersection points between RV epi and LV epi
+                if len(RV_epi_pts)>0 and len(LV_epi_pts)>0:
+                    
+                    pairs = self.get_intersections(RV_epi_pts, LV_epi_pts, distance_cutoff=4.5)
+                    
+                    if len(pairs) > 0:
+                        intersection_points = LV_epi_pts[pairs[:,1],:] # intersection points on LV
+                        intersection_on_LV_idx = np.unique(pairs[:,1])
+                        LV_epi_pts = np.array([pnt.tolist() for i, pnt in enumerate(LV_epi_pts) if i not in intersection_on_LV_idx], 
+                                              dtype=np.int64)                       
+                        RV_epi_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_epi_pts) if i not in np.unique(pairs[:,0])], 
+                                              dtype=np.int64)
+
+                if display:
+                        plt.figure(figsize=(12,12))
+                        plt.imshow(image,cmap='gray')
+                        try:
+                            plt.scatter(RV_endo_pts[:,1], RV_endo_pts[:,0], s=5, c='#F2CA19')
+                            plt.scatter(RV_septal_pts[:,1], RV_septal_pts[:,0], s=5, c='#E11845')
+                            plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
+                        except:
+                            pass
+                        try:
+                            plt.scatter(LV_epi_pts[:,1], LV_epi_pts[:,0], s=5, c='#0057E9')
+                            plt.scatter(LV_endo_pts[:,1], LV_endo_pts[:,0], s=5, c='#87E911')
+                        except:
+                            pass
+                        plt.show()
+
+                # transform to patient coordinates and write to GP file
+                point_lists = [RV_endo_pts,
+                              RV_epi_pts,
+                              RV_septal_pts,
+                              LV_epi_pts,
+                              LV_endo_pts]
+                labels = ['SAX_RV_FREEWALL',
+                         'SAX_RV_EPICARDIAL',
+                         'SAX_RV_SEPTUM',
+                         'SAX_LV_EPICARDIAL',
+                         'SAX_LV_ENDOCARDIAL']
+
+                for i,points in enumerate(point_lists):
+                    if len(points)>2:
+                        pts = [inverse_coordinate_transformation(point, S, imgOrient, ps, size=size)
+                                   for point in points.tolist()]
+
+                        if time > 1:
+                            # write to file
+                            write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
+                        else:
+                            write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
+
             else:
-                LV_endo_pts = []
-            contours, hierarchy = cv2.findContours(cv2.inRange(LV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            if len(contours) > 0:
-                LV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64) 
-            else:
-                LV_epi_pts = []
-            contours, hierarchy = cv2.findContours(cv2.inRange(RV_endo, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            if len(contours) > 0:
-                RV_endo_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)
-            else:
-                RV_endo_pts = []
-            contours, hierarchy = cv2.findContours(cv2.inRange(RV_epi, 1, 1), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            if len(contours) > 0:
-                RV_epi_pts = np.array([x.tolist() for i,x in enumerate(contours[0][:, 0, :]) if i % 2 == 0 ], dtype=np.int64)
-            else:
-                RV_epi_pts = []
-
-            # Get intersection points between RV endo and LV epi
-            if len(RV_endo_pts)>0 and len(LV_epi_pts)>0:
-                pairs = self.get_intersections(RV_endo_pts, LV_epi_pts, distance_cutoff=4.5)
-
-                if len(pairs) > 0:
-                    RV_septal_pts = RV_endo_pts[np.unique(pairs[:,0])] # deletes intersection from RV endo pts
-                    RV_endo_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_endo_pts) if i not in np.unique(pairs[:,0])], 
-                                          dtype=np.int64)
-
-            # Get intersection points between RV epi and LV epi
-            if len(RV_epi_pts)>0 and len(LV_epi_pts)>0:
-                
-                pairs = self.get_intersections(RV_epi_pts, LV_epi_pts, distance_cutoff=4.5)
-                
-                if len(pairs) > 0:
-                    intersection_points = LV_epi_pts[pairs[:,1],:] # intersection points on LV
-                    intersection_on_LV_idx = np.unique(pairs[:,1])
-                    LV_epi_pts = np.array([pnt.tolist() for i, pnt in enumerate(LV_epi_pts) if i not in intersection_on_LV_idx], 
-                                          dtype=np.int64)                       
-                    RV_epi_pts = np.array([pnt.tolist() for i, pnt in enumerate(RV_epi_pts) if i not in np.unique(pairs[:,0])], 
-                                          dtype=np.int64)
-
-            if display:
-                    plt.figure(figsize=(12,12))
-                    plt.imshow(image,cmap='gray')
-                    try:
-                        plt.scatter(RV_endo_pts[:,1], RV_endo_pts[:,0], s=5, c='#F2CA19')
-                        plt.scatter(RV_septal_pts[:,1], RV_septal_pts[:,0], s=5, c='#E11845')
-                        plt.scatter(RV_epi_pts[:,1], RV_epi_pts[:,0], s=5, c='#0057E9')
-                    except:
-                        pass
-                    try:
-                        plt.scatter(LV_epi_pts[:,1], LV_epi_pts[:,0], s=5, c='#0057E9')
-                        plt.scatter(LV_endo_pts[:,1], LV_endo_pts[:,0], s=5, c='#87E911')
-                    except:
-                        pass
-                    plt.show()
-
-            # transform to patient coordinates and write to GP file
-            point_lists = [RV_endo_pts,
-                          RV_epi_pts,
-                          RV_septal_pts,
-                          LV_epi_pts,
-                          LV_endo_pts]
-            labels = ['SAX_RV_FREEWALL',
-                     'SAX_RV_EPICARDIAL',
-                     'SAX_RV_SEPTUM',
-                     'SAX_LV_EPICARDIAL',
-                     'SAX_LV_ENDOCARDIAL']
-
-            for i,points in enumerate(point_lists):
-                if len(points)>2:
-                    pts = [inverse_coordinate_transformation(point, S, imgOrient, ps, size=size)
-                               for point in points.tolist()]
-
-                    if time > 1:
-                        # write to file
-                        write_to_gp_file(self.output_folder + '/GP_ES.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
-                    else:
-                        write_to_gp_file(self.output_folder + '/GP_ED.txt', pts, labels[i], slice_id, weight=1.0, phase=1.0)
+                pass # skip slice_ids that are not included in the final model
 
     def process_long_axis(self, display=False):
 
