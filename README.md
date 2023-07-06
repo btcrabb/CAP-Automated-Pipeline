@@ -3,7 +3,7 @@ Fully automated cardiac shape modeling in tetralogy of Fallot
 
 Author: Brendan Crabb
 
-Email: brendan.crabb@hsc.utah.edu
+Email: brendancrabb@gmail.com
 
 Fully-automated, deep-learning based pipeline to generate biventricular cardiac models from raw cine SSFP MRI images. If you use this repository in your research, please cite the following publication:
 
